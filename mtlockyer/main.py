@@ -20,10 +20,6 @@ logging.config.dictConfig(config)
 APP_NAME = "mtlockyer"
 logger = logging.getLogger(APP_NAME)
 
-BASE_URL = "https://myschools.nyc/en/dashboard/"
-WAITLIST_PAGE = "waitlists/"
-
-
 # Selenium chrome web driver
 DEFAULT_CHROME_PATH = "/Applications/Chromium.app/Contents/MacOS/Chromium"
 
@@ -94,3 +90,12 @@ def login(url: str, un: str, pw: str, timeout: int = 5, driver=web_driver) -> bo
     logger.info("Entered login credentials")
 
     return _check_logged_in(wbd_wait)
+
+
+def go_to_waitlist(url: str, timeout: int = 5, driver=web_driver):
+    """
+    ...
+    """
+    driver.get(url)
+    wbd_wait = WebDriverWait(driver, timeout)
+    wbd_wait.until(EC.element_to_be_clickable((By.ID, "main-nav-search")))

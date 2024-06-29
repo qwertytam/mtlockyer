@@ -8,7 +8,12 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
+from bs4 import BeautifulSoup as bs
+import re
 import yaml
+
+from mtlockyer.constants import DEFAULT_CHROME_PATH, CHROME_OPTIONS
+from mtlockyer.constants import BASE_URL, WAITLIST_PAGE
 
 # Set up logging
 mpath = Path(__file__).parent.absolute()
@@ -20,25 +25,25 @@ logging.config.dictConfig(config)
 APP_NAME = "mtlockyer"
 logger = logging.getLogger(APP_NAME)
 
-# Selenium chrome web driver
-DEFAULT_CHROME_PATH = "/Applications/Chromium.app/Contents/MacOS/Chromium"
 
-CHROME_OPTIONS = [
-    "--headless",
-    "start-maximized",
-    "--disable-blink-features",
-    "--disable-blink-features=AutomationControlled",
-]
+def create_web_driver(chrome_path=DEFAULT_CHROME_PATH, chrome_options=CHROME_OPTIONS):
+    """
+    Set options to use Chromium with Selenium
 
-chrome_path = DEFAULT_CHROME_PATH
-chrome_args = CHROME_OPTIONS
+    Args:
+        chrome_path: Path to chrome binary
+        chrome_options: Options to use
 
-# Set options to use Chromium with Selenium
-wbd_options = webdriver.ChromeOptions()
-wbd_options.binary_location = chrome_path
-for arg in chrome_args:
-    wbd_options.add_argument(arg)
-web_driver = webdriver.Chrome(options=wbd_options)
+    Returns
+        Web driver
+    """
+    options = webdriver.ChromeOptions()
+    options.binary_location = chrome_path
+    for arg in chrome_options:
+        options.add_argument(arg)
+    driver = webdriver.Chrome(options=options)
+
+    return driver
 
 
 def _check_logged_in(wbd_wait) -> bool:
@@ -59,7 +64,7 @@ def _check_logged_in(wbd_wait) -> bool:
     return logged_in
 
 
-def login(url: str, un: str, pw: str, timeout: int = 5, driver=web_driver) -> bool:
+def login(url: str, un: str, pw: str, driver, timeout: int = 5) -> bool:
     """
     Login in selenium browser
 
@@ -67,6 +72,8 @@ def login(url: str, un: str, pw: str, timeout: int = 5, driver=web_driver) -> bo
         url: Login url
         un: Username to use to login
         pw: Password to use to login
+        driver: Selenium web driver
+        timeout: Time to wait for website response
 
     Returns
         True if logged in successfully, otherwise False
@@ -89,13 +96,38 @@ def login(url: str, un: str, pw: str, timeout: int = 5, driver=web_driver) -> bo
     ).click()
     logger.info("Entered login credentials")
 
-    return _check_logged_in(wbd_wait)
+    logged_in = _check_logged_in(wbd_wait)
+
+    return logged_in
 
 
-def go_to_waitlist(url: str, timeout: int = 5, driver=web_driver):
+def go_to_waitlist(student_id: str, driver, timeout: int = 5):
     """
     ...
     """
+    url = BASE_URL + student_id + "/" + WAITLIST_PAGE
     driver.get(url)
     wbd_wait = WebDriverWait(driver, timeout)
     wbd_wait.until(EC.element_to_be_clickable((By.ID, "main-nav-search")))
+    logger.info("wait 1")
+    wbd_wait.until(EC.presence_of_element_located((By.TAG_NAME, "h1")))
+    logger.info("wait 2")
+
+    # print(driver.page_source)
+
+    return driver
+
+
+def _string_in_tag(search_string: str, tag) -> bool:
+    logger.info(f"tag.string: {tag.string}")
+    logger.info(f"search_string: {search_string}")
+    return tag.string == search_string
+
+
+def get_latest_waitlist_posn(html_content: str) -> int:
+    """
+    ...
+    """
+    soup = bs(html_content, "html.parser")
+    el = soup.find_all(string=lambda text: "WAITLIST POSITION:" in text, limit=1)
+    return el[0].parent.b.contents[0]

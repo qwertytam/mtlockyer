@@ -1,32 +1,21 @@
 """Script"""
 
-# import sys
 import os
 from dotenv import load_dotenv
 
-# from pathlib import Path
-from mtlockyer.main import login, go_to_waitlist
-
-
-# mpath = Path(__file__).parent.parent.absolute() / "src"
-
-# print(mpath)
-# sys.path.append(mpath)
-# from main import login
+from mtlockyer.main import create_web_driver, login, go_to_waitlist, get_latest_waitlist_posn
+from mtlockyer.constants import LOGIN_URL
 
 load_dotenv()
 
-UN = os.getenv("UN")
-PW = os.getenv("PW")
-STUDENTID = os.getenv("STUDENTID")
+UN = f"{os.getenv("UN")}"
+PW = f"{os.getenv("PW")}"
+STUDENTID = f"{os.getenv("STUDENTID")}"
 SMSNUM = os.getenv("SMSNUM")
 
-LOGIN_URL = "https://myschools.nyc/en/account/log-in/"
-BASE_URL = "https://myschools.nyc/en/dashboard/"
-WAITLIST_PAGE = "waitlists/"
-
-
-login(LOGIN_URL, UN, PW)
-
-url = BASE_URL + STUDENTID + "/" + WAITLIST_PAGE
-go_to_waitlist(url)
+driver = create_web_driver()
+logged_in = login(LOGIN_URL, UN, PW, driver)
+driver = go_to_waitlist(STUDENTID, driver)
+wl_posn = get_latest_waitlist_posn(driver.page_source)
+print(f"wl_posn: {wl_posn}")
+driver.quit()

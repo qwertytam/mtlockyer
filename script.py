@@ -39,6 +39,14 @@ def main(fp: Path):
     driver.quit()
 
 
+def lambda_handler(event, context):
+    """
+    Function for AWS Lambda microservice
+    """
+    fp = event.get("filepath", "./wl_posn.json")
+    main(fp)
+
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(

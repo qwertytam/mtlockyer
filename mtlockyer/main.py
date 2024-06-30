@@ -1,19 +1,22 @@
 """Main module"""
 
 import json
-import logging
-import logging.config
+
+# import logging
+# import logging.config
 from datetime import datetime as dt
 from datetime import timezone as tz
 from pathlib import Path
 
-import yaml
+# import yaml
 from bs4 import BeautifulSoup as bs
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
+import chromedriver_autoinstaller
+from selenium.webdriver.chrome.service import Service
 
 from mtlockyer.constants import (
     BASE_URL,
@@ -23,17 +26,17 @@ from mtlockyer.constants import (
 )
 
 # Set up logging
-mpath = Path(__file__).parent.absolute()
-with open(mpath / "logging.yaml", "rt", encoding="utf8") as f:
-    config = yaml.safe_load(f.read())
-    f.close()
-logging.config.dictConfig(config)
+# mpath = Path(__file__).parent.absolute()
+# with open(mpath / "logging.yaml", "rt", encoding="utf8") as f:
+#     config = yaml.safe_load(f.read())
+#     f.close()
+# logging.config.dictConfig(config)
 
-APP_NAME = "mtlockyer"
-logger = logging.getLogger(APP_NAME)
+# APP_NAME = "mtlockyer"
+# logger = logging.getLogger(APP_NAME)
 
 
-def create_web_driver(chrome_path: str, chrome_options: list):
+def create_web_driver(chrome_path: str, chrome_optionssss: list):
     """
     Set options to use Chromium with Selenium
 
@@ -44,12 +47,48 @@ def create_web_driver(chrome_path: str, chrome_options: list):
     Returns
         Web driver
     """
-    options = webdriver.ChromeOptions()
-    options.binary_location = chrome_path
-    for arg in chrome_options:
-        options.add_argument(arg)
-    driver = webdriver.Chrome(options=options)
+    # print("installing driver!")
+    # chromedriver_autoinstaller.install()
+    print("Creating webdriver")
+    # options = webdriver.ChromeOptions()
+    # options.binary_location = chrome_path
+    # print("Have set chrome location %s", chrome_path)
+    # for arg in chrome_options:
+    # options.add_argument(arg)
+    # print("Have set chrome options")
+    # print("Trying to create driver")
+    # driver = webdriver.Chrome(options=options)
+    # driver = webdriver.Chrome()
 
+    import os
+
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--window-size=1280x1696")
+    chrome_options.add_argument("--user-data-dir=/tmp/user-data")
+    chrome_options.add_argument("--hide-scrollbars")
+    chrome_options.add_argument("--enable-logging")
+    chrome_options.add_argument("--log-level=0")
+    chrome_options.add_argument("--v=99")
+    chrome_options.add_argument("--single-process")
+    chrome_options.add_argument("--data-path=/tmp/data-path")
+    chrome_options.add_argument("--ignore-certificate-errors")
+    chrome_options.add_argument("--homedir=/tmp")
+    chrome_options.add_argument("--disk-cache-dir=/tmp/cache-dir")
+    chrome_options.add_argument(
+        "user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+    )
+    chrome_options.binary_location = os.getcwd() + "/bin/headless-chromium"
+
+    service = Service(executable_path=r"/opt/bin/chromedriver")
+
+    print("Have set chrome options")
+    print("Trying to create driver")
+    driver = webdriver.Chrome(options=chrome_options, service=service)
+
+    print("Have created driver")
     return driver
 
 
@@ -64,10 +103,12 @@ def _check_logged_in(wbd_wait) -> bool:
                 )
             )
         )
-        logger.info("basic-card; assumed login successful")
+        # logger.info("basic-card; assumed login successful")
+        print("basic-card; assumed login successful")
         logged_in = True
     except TimeoutException:
-        logger.error("TimeoutException: Assuming wrong credentials; exiting")
+        # logger.error("TimeoutException: Assuming wrong credentials; exiting")
+        print("TimeoutException: Assuming wrong credentials; exiting")
     return logged_in
 
 
@@ -86,22 +127,24 @@ def login(url: str, un: str, pw: str, driver, timeout: int = 5) -> bool:
         True if logged in successfully, otherwise False
     """
 
-    logger.info("Start login")
+    # logger.info("Start login")
+    print("Start login")
     driver.get(url)
 
     wbd_wait = WebDriverWait(driver, timeout)
     wbd_wait.until(EC.element_to_be_clickable((By.ID, "id_username"))).send_keys(un)
-    logger.debug("Entered Username")
+    # logger.debug("Entered Username")
 
     wbd_wait.until(EC.element_to_be_clickable((By.ID, "id_password"))).send_keys(pw)
-    logger.debug("Entered Password")
+    # logger.debug("Entered Password")
 
     wbd_wait.until(
         EC.element_to_be_clickable(
             (By.XPATH, ".//button[@class='button' and @type='submit']")
         )
     ).click()
-    logger.info("Entered login credentials")
+    # logger.info("Entered login credentials")
+    print("Entered login credentials")
 
     logged_in = _check_logged_in(wbd_wait)
 
@@ -165,7 +208,7 @@ def save_waitlist_posn(posn: str, wl_date: str, last_update: str, file_path: Pat
         "last_updated": last_update,
         "waitlist_position": posn,
     }
-    logger.debug("Saving waitlist position to '%s'", file_path)
+    # logger.debug("Saving waitlist position to '%s'", file_path)
     with open(file_path, "w", encoding="utf8") as json_file:
         json.dump(wl_dict, json_file, indent=4)
 
@@ -184,7 +227,8 @@ def get_saved_waitlist_data(file_path: Path) -> dict:
         with open(file_path, "r", encoding="utf-8") as json_file:
             wl_dict = json.load(json_file)
     except FileNotFoundError:
-        logger.info("File not found; returning default wl dictionary")
+        # logger.info("File not found; returning default wl dictionary")
+        print("File not found; returning default wl dictionary")
         wl_dict = DEFAULT_WL_DICT
         dt_now = dt.now().astimezone(tz.utc).strftime(DT_FORMAT)
         wl_dict["waitlist_datetime"] = dt_now
@@ -249,11 +293,11 @@ def compare_waitlist_posns(file_path: Path, posn: str) -> bool:
     wl_data = get_saved_waitlist_data(file_path)
     wl_posn = get_saved_waitlist_posn(wl_data)
 
-    logger.debug("posn: %s, wl_posn: %s", posn, wl_posn)
+    # logger.debug("posn: %s, wl_posn: %s", posn, wl_posn)
     if int(posn) != int(wl_posn):
         has_changed = True
 
-    logger.debug("has_changed: %s", has_changed)
+    # logger.debug("has_changed: %s", has_changed)
     dt_now = dt.now().astimezone(tz.utc).strftime(DT_FORMAT)
     if has_changed:
         save_waitlist_posn(posn, dt_now, dt_now, file_path)

@@ -20,14 +20,15 @@ UN = f"{os.getenv('UN')}"
 PW = f"{os.getenv('PW')}"
 STUDENTID = f"{os.getenv('STUDENTID')}"
 SMSNUM = os.getenv("SMSNUM")
-CHROME_PATH = f"{os.getenv('CHROME_PATH')}"
+CHROME_PATH = f"{os.getenv('CHROME_PATH', "/opt/headless-chromium")}"
 
 
 def main(fp: Path):
     """
     Main script
     """
-    driver = create_web_driver(CHROME_PATH, CHROME_OPTIONS)
+    print("Starting main with fp %s", fp)
+    driver = create_web_driver("/opt/headless-chromium", CHROME_OPTIONS)
     _ = login(LOGIN_URL, UN, PW, driver)
     driver = go_to_waitlist(STUDENTID, driver)
     wl_posn = get_latest_waitlist_posn(driver.page_source)
@@ -37,14 +38,6 @@ def main(fp: Path):
     print(f"has_change: {has_changed}")
 
     driver.quit()
-
-
-def lambda_handler(event, context):
-    """
-    Function for AWS Lambda microservice
-    """
-    fp = event.get("filepath", "./wl_posn.json")
-    main(fp)
 
 
 if __name__ == "__main__":

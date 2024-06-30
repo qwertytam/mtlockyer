@@ -9,9 +9,11 @@ DT_FORMAT = "%Y-%m-%d %H:%M:%S.%f %Z%z"
 # Selenium Chrome webdriver options
 CHROME_OPTIONS = [
     "--headless",
-    "start-maximized",
-    "--disable-blink-features",
-    "--disable-blink-features=AutomationControlled",
+    "--no-sandbox",
+    "--disable-dev-shm-usage",
+    "--disable-gpu",
+    "--single-process",
+    "--disable-software-rasterizer",
 ]
 
 # In case file not found

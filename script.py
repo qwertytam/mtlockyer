@@ -34,7 +34,7 @@ def main(fp: Path):
     print(f"wl_posn: {wl_posn}")
 
     has_changed = compare_waitlist_posns(fp, wl_posn)
-    print(f"has_change: {has_changed}")
+    print(f"has_changed: {has_changed}")
 
     driver.quit()
 

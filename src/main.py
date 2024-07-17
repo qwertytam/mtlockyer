@@ -515,7 +515,7 @@ def __get_waitlist_from_s3(s3_bucket_object: dict) -> dict:
     bucket = s3_resource.Bucket(s3_bucket_object["bucket"])
     obj_wrapper = ObjectWrapper(bucket.Object(s3_bucket_object["object_key"]))
     wl_bytes = obj_wrapper.get()
-    wl_dict = wl_bytes.decode('utf8').replace("'", '"')
+    wl_dict = json.loads(wl_bytes.decode('utf8').replace("'", '"'))
 
     print(f"Found object '{s3_bucket_object}'; "
           f"returning data:\n{json.dumps(wl_dict, indent=4)}\nEND")
@@ -544,7 +544,7 @@ def get_saved_waitlist_data(
     else:
         if s3_bucket_object is None:
             s3_bucket_object = {"bucket": "", "object_key": ""}
-        print("Saving waitlist position to s3")
+        print("Getting waitlist position from s3")
         wl_dict = __get_waitlist_from_s3(s3_bucket_object)
 
     return wl_dict
@@ -560,6 +560,10 @@ def get_saved_waitlist_posn(wl_dict: dict) -> str:
     Returns
         Waitlist position
     """
+    print(f"wl_dict is type '{type(wl_dict)}' with string output:\n{wl_dict}")
+    
+    for k in wl_dict.keys():
+        print(f"k: '{k}' v: '{wl_dict[k]}'")
     return wl_dict["waitlist_position"]
 
 

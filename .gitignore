@@ -28,8 +28,6 @@ MANIFEST
 .env
 .DS_Store
 *.log.*
-*.json
-*.zip
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

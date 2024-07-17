@@ -12,6 +12,9 @@ RUN rm ./chrome-installer.sh
 
 RUN pip install selenium
 
+# install other package dependencies
+RUN pip install beautifulsoup4
+
 COPY main.py ./
 
 CMD [ "main.lambda_handler" ] 

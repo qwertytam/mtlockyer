@@ -345,7 +345,8 @@ def login(url: str, un: str, pw: str, driver, timeout: int = 5) -> bool:
     """
 
     # logger.info("Start login")
-    print("Start login")
+    print(f"Starting login: url '{url}' un '{un}' pw '{pw}'")
+    print(f"types: url '{type(url)}' un '{type(un)}' pw '{type(pw)}'")
     driver.get(url)
 
     wbd_wait = WebDriverWait(driver, timeout)
@@ -569,7 +570,8 @@ def get_saved_waitlist_last_update(wl_dict: dict) -> dt:
     return dt.strptime(wl_dict["last_updated"], str(DateFormats.DEFAULT))
 
 
-def compare_waitlist_posns(posn: str, file_path: Optional[Path]=None, s3_bucket_object: Optional[dict]=None) -> bool:
+def compare_waitlist_posns(
+    posn: str, file_path: Optional[Path]=None, s3_bucket_object: Optional[dict]=None) -> bool:
     """
     Check if waitlist position has changed; if changed, updates json file
     that contains waitlist information

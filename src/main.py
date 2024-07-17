@@ -672,7 +672,7 @@ def lambda_handler(event, context):
     driver.quit()
 
     sns_topic_arn = event.get("sns-topic-arn", "")
-    subject_text = f"There is {'a' if has_changed else 'no'} in waitlist position"
+    subject_text = f"There is {'a' if has_changed else 'no'} change in waitlist position at number {wl_posn}"
     body_text = f"Sent at {dt.now().astimezone(tz.utc).strftime(str(DateFormats.DEFAULT.value))}"
 
     print(

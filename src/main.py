@@ -625,7 +625,7 @@ def lambda_handler(event, context):
     driver = initialise_driver()
 
     print("Logging in")
-    logged_in = login(URLConstants.LOGIN_URL, site_un, site_pw, driver)
+    logged_in = login(str(URLConstants.LOGIN_URL), site_un, site_pw, driver)
     print(f"Was login a succes? {logged_in}")
 
     print("Going to waitlist")

@@ -228,6 +228,7 @@ def initialise_driver(
     binary_location="/opt/chrome/chrome-linux64/chrome",
     executable_path="/opt/chrome-driver/chromedriver-linux64/chromedriver",
     service_log_path="/tmp/chromedriver.log",
+    options=None,
 ):
     """
     Initialise Chrome driver
@@ -242,28 +243,46 @@ def initialise_driver(
     """
     print("Initialising driver")
     chrome_options = ChromeOptions()
-    chrome_options.add_argument("--headless=new")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--disable-dev-tools")
-    chrome_options.add_argument("--no-zygote")
-    chrome_options.add_argument("--single-process")
-    chrome_options.add_argument(f"--user-data-dir={mkdtemp()}")
-    chrome_options.add_argument(f"--data-path={mkdtemp()}")
-    chrome_options.add_argument(f"--disk-cache-dir={mkdtemp()}")
-    chrome_options.add_argument("--remote-debugging-pipe")
-    chrome_options.add_argument("--verbose")
-    chrome_options.add_argument("--log-path=/tmp")
-    chrome_options.add_argument("--disable-software-rasterizer")
+    if options is None:
+        print("Using default options")
+        chrome_options.add_argument("--headless=new")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--disable-dev-tools")
+        chrome_options.add_argument("--no-zygote")
+        chrome_options.add_argument("--single-process")
+        chrome_options.add_argument(f"--user-data-dir={mkdtemp()}")
+        chrome_options.add_argument(f"--data-path={mkdtemp()}")
+        chrome_options.add_argument(f"--disk-cache-dir={mkdtemp()}")
+        chrome_options.add_argument("--remote-debugging-pipe")
+        chrome_options.add_argument("--verbose")
+        chrome_options.add_argument("--log-path=/tmp")
+        chrome_options.add_argument("--disable-software-rasterizer")
+    else:
+        print(f"Using passed options {options}")
+        for option in options:
+            chrome_options.add_argument(option)
+    print("Finished adding options")
+
     chrome_options.binary_location = binary_location
+    print("added binary location")
 
-    service = Service(
-        executable_path=executable_path,
-        service_log_path=service_log_path,
-    )
+    if isinstance(service_log_path, str) and isinstance(executable_path, str):
+        print("adding executable and serivce log path")
+        service = Service(
+            executable_path=executable_path,
+            service_log_path=service_log_path,
+        )
+        print("calling webdriver.Chrome")
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+    else:
+        print("not adding service")
+        print("calling webdriver.Chrome")
+        driver = webdriver.Chrome(options=chrome_options)
 
-    driver = webdriver.Chrome(service=service, options=chrome_options)
+
+    
 
     return driver
 
@@ -384,7 +403,7 @@ def go_to_waitlist(
         Driver on waitlist page
     """
     url = (
-        str(URLConstants.BASE_URL) + student_id + "/" + str(URLConstants.WAITLIST_PAGE)
+        str(URLConstants.BASE_URL.value) + student_id + "/" + str(URLConstants.WAITLIST_PAGE.value)
     )
     driver.get(url)
     wbd_wait = WebDriverWait(driver, timeout)
@@ -481,8 +500,8 @@ def __get_waitlist_from_file(file_path: Path) -> dict:
     except FileNotFoundError:
         # logger.info("File not found; returning default wl dictionary")
         print("File not found; returning default wl dictionary")
-        wl_dict = DataFileDictFormat.DEFAULT_WL_DICT
-        dt_now = dt.now().astimezone(tz.utc).strftime(str(DateFormats.DEFAULT))
+        wl_dict = DataFileDictFormat.DEFAULT_WL_DICT.value
+        dt_now = dt.now().astimezone(tz.utc).strftime(str(DateFormats.DEFAULT.value))
         wl_dict["waitlist_datetime"] = dt_now
         wl_dict["last_updated"] = dt_now
 
@@ -554,7 +573,7 @@ def get_saved_waitlist_datetime(wl_dict: dict) -> dt:
     Returns
         Waitlist change datetime
     """
-    return dt.strptime(wl_dict["waitlist_datetime"], str(DateFormats.DEFAULT))
+    return dt.strptime(wl_dict["waitlist_datetime"], str(DateFormats.DEFAULT.value))
 
 
 def get_saved_waitlist_last_update(wl_dict: dict) -> dt:
@@ -567,7 +586,7 @@ def get_saved_waitlist_last_update(wl_dict: dict) -> dt:
     Returns
         Waitlist last check datetime
     """
-    return dt.strptime(wl_dict["last_updated"], str(DateFormats.DEFAULT))
+    return dt.strptime(wl_dict["last_updated"], str(DateFormats.DEFAULT.value))
 
 
 def compare_waitlist_posns(
@@ -596,11 +615,11 @@ def compare_waitlist_posns(
         has_changed = True
 
     # logger.debug("has_changed: %s", has_changed)
-    dt_now = dt.now().astimezone(tz.utc).strftime(str(DateFormats.DEFAULT))
+    dt_now = dt.now().astimezone(tz.utc).strftime(str(DateFormats.DEFAULT.value))
     if has_changed:
         save_waitlist_posn(posn, dt_now, dt_now, file_path, s3_bucket_object)
     else:
-        existing_date = get_saved_waitlist_datetime(wl_data).strftime(str(DateFormats.DEFAULT))
+        existing_date = get_saved_waitlist_datetime(wl_data).strftime(str(DateFormats.DEFAULT.value))
         save_waitlist_posn(wl_posn, existing_date, dt_now, file_path, s3_bucket_object)
 
     return has_changed
@@ -627,7 +646,7 @@ def lambda_handler(event, context):
     driver = initialise_driver()
 
     print("Logging in")
-    logged_in = login(str(URLConstants.LOGIN_URL), site_un, site_pw, driver)
+    logged_in = login(str(URLConstants.LOGIN_URL.value), site_un, site_pw, driver)
     print(f"Was login a succes? {logged_in}")
 
     print("Going to waitlist")
@@ -650,7 +669,7 @@ def lambda_handler(event, context):
 
     sns_topic_arn = event.get("sns-topic-arn", "")
     subject_text = f"There is {'a' if has_changed else 'no'} in waitlist position"
-    body_text = f"Sent at {dt.now().astimezone(tz.utc).strftime(str(DateFormats.DEFAULT))}"
+    body_text = f"Sent at {dt.now().astimezone(tz.utc).strftime(str(DateFormats.DEFAULT.value))}"
 
     print(
         "Trying email send from "

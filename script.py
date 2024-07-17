@@ -6,13 +6,14 @@ import argparse
 from pathlib import Path
 from dotenv import load_dotenv
 
-from mtlockyer.main import create_web_driver, login
-from mtlockyer.main import (
+from src.main import initialise_driver, login
+from src.main import (
     go_to_waitlist,
     get_latest_waitlist_posn,
     compare_waitlist_posns,
 )
-from mtlockyer.constants import LOGIN_URL, CHROME_OPTIONS
+
+from src.main import URLConstants
 
 load_dotenv()
 
@@ -27,13 +28,22 @@ def main(fp: Path):
     """
     Main script
     """
-    driver = create_web_driver(CHROME_PATH, CHROME_OPTIONS)
-    _ = login(LOGIN_URL, UN, PW, driver)
+    driver = initialise_driver(
+        executable_path=None,
+        service_log_path=None,
+        options=[
+            "--headless",
+            "start-maximized",
+            "--disable-blink-features",
+            "--disable-blink-features=AutomationControlled",
+        ],
+    )
+    _ = login(URLConstants.LOGIN_URL.value, UN, PW, driver)
     driver = go_to_waitlist(STUDENTID, driver)
     wl_posn = get_latest_waitlist_posn(driver.page_source)
     print(f"wl_posn: {wl_posn}")
 
-    has_changed = compare_waitlist_posns(fp, wl_posn)
+    has_changed = compare_waitlist_posns(wl_posn, file_path=fp)
     print(f"has_changed: {has_changed}")
 
     driver.quit()

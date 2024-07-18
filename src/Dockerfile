@@ -21,6 +21,6 @@ COPY exceptions.py ./src/
 COPY main.py ./src/
 COPY objectwrapper.py ./src/
 COPY secretswrapper.py ./src/
+COPY lambda_handler.py ./
 
-WORKDIR "/src"
-CMD [ "main.lambda_handler" ] 
+CMD [ "lambda_handler.lambda_handler" ] 

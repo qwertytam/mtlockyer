@@ -21,7 +21,7 @@ class DataFileDictFormat(Enum):
     """To populate empty file"""
 
     DEFAULT_WL_DICT = {
-        "waitlist_datetime": None,
-        "last_updated": None,
+        "waitlist_datetime": "",
+        "last_updated": "",
         "waitlist_position": -1,
     }

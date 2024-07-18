@@ -347,7 +347,12 @@ def __get_waitlist_from_s3(s3_bucket_object: dict) -> dict:
     obj_list = obj_wrapper.list(bucket=bucket, prefix=obj_key)
 
     if obj_key not in obj_list:
-        logger.info("Object not found; creating default wl dictionary")
+        logger.info(
+            "obj_key '%s' type '%s' not found in list '%s'; creating default wl dictionary",
+            obj_key,
+            type(obj_key),
+            obj_list,
+        )
         wl_dict = __create_empty_datafile()
         __save_waitlist_to_s3(wl_dict, s3_bucket_object)
 

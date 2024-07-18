@@ -68,7 +68,6 @@ def initialise_driver(
     logger.info("Initialising driver")
     chrome_options = ChromeOptions()
     if options is None:
-        logger.info("Using default options")
         chrome_options.add_argument("--headless=new")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
@@ -84,25 +83,18 @@ def initialise_driver(
         chrome_options.add_argument("--log-path=/tmp")
         chrome_options.add_argument("--disable-software-rasterizer")
     else:
-        logger.info("Using passed options '%s'", options)
         for option in options:
             chrome_options.add_argument(option)
-    logger.info("Finished adding options")
 
     chrome_options.binary_location = binary_location
-    logger.info("Added binary location")
 
     if isinstance(service_log_path, str) and isinstance(executable_path, str):
-        logger.info("Adding executable and serivce log path")
         service = Service(
             executable_path=executable_path,
             service_log_path=service_log_path,
         )
-        logger.info("Calling webdriver.Chrome")
         driver = webdriver.Chrome(service=service, options=chrome_options)
     else:
-        logger.info("Not adding service")
-        logger.info("Calling webdriver.Chrome")
         driver = webdriver.Chrome(options=chrome_options)
 
     return driver
@@ -160,11 +152,9 @@ def _check_logged_in(wbd_wait) -> bool:
                 )
             )
         )
-        # logger.info("basic-card; assumed login successful")
         logger.info("basic-card; assumed login successful")
         logged_in = True
     except TimeoutException:
-        # logger.error("TimeoutException: Assuming wrong credentials; exiting")
         logger.info("TimeoutException: Assuming wrong credentials; exiting")
     return logged_in
 
@@ -189,17 +179,14 @@ def login(url: str, un: str, pw: str, driver, timeout: int = 5) -> bool:
 
     wbd_wait = WebDriverWait(driver, timeout)
     wbd_wait.until(EC.element_to_be_clickable((By.ID, "id_username"))).send_keys(un)
-    # logger.debug("Entered Username")
 
     wbd_wait.until(EC.element_to_be_clickable((By.ID, "id_password"))).send_keys(pw)
-    # logger.debug("Entered Password")
 
     wbd_wait.until(
         EC.element_to_be_clickable(
             (By.XPATH, ".//button[@class='button' and @type='submit']")
         )
     ).click()
-    logger.info("Entered login credentials")
 
     logged_in = _check_logged_in(wbd_wait)
 
@@ -296,14 +283,11 @@ def save_waitlist_posn(
         "last_updated": last_update,
         "waitlist_position": posn,
     }
-    # logger.debug("Saving waitlist position to '%s'", file_path)
     if file_path is not None:
-        logger.info("Saving waitlist position to file")
         __save_waitlist_to_file(wl_dict, file_path)
     else:
         if s3_bucket_object is None:
             s3_bucket_object = {"bucket": "", "object_key": ""}
-        logger.info("Saving waitlist position to s3")
         __save_waitlist_to_s3(wl_dict, s3_bucket_object)
 
 
@@ -384,12 +368,10 @@ def get_saved_waitlist_data(
     """
 
     if file_path is not None:
-        logger.info("Getting waitlist position from file")
         wl_dict = __get_waitlist_from_file(file_path)
     else:
         if s3_bucket_object is None:
             s3_bucket_object = {"bucket": "", "object_key": ""}
-        logger.info("Getting waitlist position from s3")
         wl_dict = __get_waitlist_from_s3(s3_bucket_object)
 
     return wl_dict
@@ -405,8 +387,6 @@ def get_saved_waitlist_posn(wl_dict: dict) -> str:
     Returns
         Waitlist position
     """
-    logger.info("wl_dict is type '%s' with string output:\n%s", type(wl_dict), wl_dict)
-
     for k in wl_dict.keys():
         logger.info("k: '%s' v: '%s'", k, wl_dict[k])
     return wl_dict["waitlist_position"]
@@ -460,11 +440,9 @@ def compare_waitlist_posns(
     wl_data = get_saved_waitlist_data(file_path, s3_bucket_object)
     wl_posn = get_saved_waitlist_posn(wl_data)
 
-    # logger.debug("posn: %s, wl_posn: %s", posn, wl_posn)
     if int(posn) != int(wl_posn):
         has_changed = True
 
-    # logger.debug("has_changed: %s", has_changed)
     dt_now = dt.now().astimezone(tz.utc).strftime(str(DateFormats.DEFAULT.value))
     if has_changed:
         save_waitlist_posn(posn, dt_now, dt_now, file_path, s3_bucket_object)

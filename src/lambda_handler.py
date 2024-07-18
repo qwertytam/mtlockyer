@@ -26,7 +26,6 @@ def lambda_handler(event, context):
     Returns:
         Status response dictionary
     """
-    logger.info("Entered `lambda_handler()` with '%s' and '%s'", event, context)
     site_un = event.get("site-un", "")
 
     aws_secrets = json.loads(get_aws_secret("mtlockeyer-aws-secrets"))
@@ -39,7 +38,6 @@ def lambda_handler(event, context):
     logged_in = login(str(URLConstants.LOGIN_URL.value), site_un, site_pw, driver)
     logger.info("Was login a succes? '%s'", logged_in)
 
-    logger.info("Going to waitlist")
     driver = go_to_waitlist(student_id, driver)
 
     logger.info("Getting waitlist position")
@@ -49,11 +47,6 @@ def lambda_handler(event, context):
     s3_bucket = event.get("s3-bucket", "")
     s3_object_key = event.get("s3-object-key", "")
 
-    logger.info(
-        "Checking if waitlist position has changed on bucket '%s' and object '%s'",
-        s3_bucket,
-        s3_object_key,
-    )
     s3_bucket_object = {"bucket": s3_bucket, "object_key": s3_object_key}
     has_changed = compare_waitlist_posns(wl_posn, s3_bucket_object=s3_bucket_object)
     logger.info("has_changed?: '%s'", has_changed)
@@ -66,16 +59,6 @@ def lambda_handler(event, context):
         body_text = (
             "Sent at "
             + f"{dt.now().astimezone(tz.utc).strftime(str(DateFormats.DEFAULT.value))}"
-        )
-
-        logger.info(
-            "Trying email send from "
-            "sns_topic_arn '%s' "
-            "subject '%s' "
-            "body '%s' ",
-            sns_topic_arn,
-            subject_text,
-            body_text,
         )
 
         _ = send_email(sns_topic_arn, subject_text, body_text)

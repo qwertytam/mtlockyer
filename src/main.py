@@ -241,7 +241,7 @@ def __save_waitlist_to_file(wl_dict: dict, file_path: Path):
     with open(file_path, "w", encoding="utf8") as json_file:
         json.dump(wl_dict, json_file, indent=4)
 
-    logger.info("Have written '%s' to '%s", wl_dict, file_path)
+    logger.info("Have written to '%s", file_path)
 
 
 def __save_waitlist_to_s3(wl_dict: dict, s3_bucket_object: dict):
@@ -249,10 +249,6 @@ def __save_waitlist_to_s3(wl_dict: dict, s3_bucket_object: dict):
     bucket = s3_resource.Bucket(s3_bucket_object["bucket"])
     obj_wrapper = ObjectWrapper(bucket.Object(s3_bucket_object["object_key"]))
     obj_wrapper.put(bytes(json.dumps(wl_dict, indent=4).encode(encoding="utf-8")))
-
-    logger.info(
-        "Have put '%s' into object '%s'", wl_dict, s3_bucket_object["object_key"]
-    )
 
 
 def save_waitlist_posn(
@@ -330,7 +326,6 @@ def __get_waitlist_from_s3(s3_bucket_object: dict) -> dict:
 
     obj_list = obj_wrapper.list(bucket=bucket, prefix=obj_key)
     obj_names = obj_wrapper.get_object_names(obj_list)
-    logger.info("Found obj names: '%s'", obj_names)
 
     if obj_key not in obj_names:
         logger.info(
@@ -345,10 +340,6 @@ def __get_waitlist_from_s3(s3_bucket_object: dict) -> dict:
     wl_bytes = obj_wrapper.get()
     wl_dict = json.loads(wl_bytes.decode("utf8").replace("'", '"'))
 
-    logger.info(
-        "Found object '%s'; returning data",
-        s3_bucket_object,
-    )
     return wl_dict
 
 
@@ -451,4 +442,4 @@ def compare_waitlist_posns(
         )
         save_waitlist_posn(wl_posn, existing_date, dt_now, file_path, s3_bucket_object)
 
-    return has_changed
+    return has_changed, wl_posn

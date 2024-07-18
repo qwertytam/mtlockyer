@@ -16,5 +16,6 @@ RUN pip install selenium
 RUN pip install beautifulsoup4
 
 COPY main.py ./
+COPY constants.py ./
 
 CMD [ "main.lambda_handler" ] 

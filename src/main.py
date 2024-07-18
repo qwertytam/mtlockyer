@@ -5,9 +5,9 @@ import json
 from tempfile import mkdtemp
 from datetime import datetime as dt
 from datetime import timezone as tz
-from enum import Enum
 from pathlib import Path
 from typing import Optional
+from bs4 import BeautifulSoup as bs
 
 import boto3
 from botocore.exceptions import ClientError
@@ -20,34 +20,9 @@ from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
-from bs4 import BeautifulSoup as bs
+from constants import DateFormats, URLConstants, DataFileDictFormat
 
 logger = logging.getLogger(__name__)
-
-
-# Constant classes >>> move to seperate module when possible
-class DateFormats(Enum):
-    """For outputting datetimes as strings"""
-
-    DEFAULT = "%Y-%m-%d %H:%M:%S.%f %Z%z"
-
-
-class URLConstants(Enum):
-    """ "Useful reference urls"""
-
-    LOGIN_URL = "https://myschools.nyc/en/account/log-in/"
-    BASE_URL = "https://myschools.nyc/en/dashboard/"
-    WAITLIST_PAGE = "waitlists/"
-
-
-class DataFileDictFormat(Enum):
-    """To populate empty file"""
-
-    DEFAULT_WL_DICT = {
-        "waitlist_datetime": None,
-        "last_updated": None,
-        "waitlist_position": -1,
-    }
 
 
 class ObjClientExceptions(ClientError):

@@ -338,11 +338,21 @@ def __get_waitlist_from_s3(s3_bucket_object: dict) -> dict:
     obj_wrapper = ObjectWrapper(bucket.Object(s3_bucket_object["object_key"]))
 
     logger.info("Getting object list")
-    _ = obj_wrapper.list(bucket=bucket)
+    obj_list = obj_wrapper.list(bucket=bucket)
 
-    prefix = s3_bucket_object["object_key"]
+    obj_key = s3_bucket_object["object_key"]
+
+    logger.info("Is list None? '%s'", obj_list is None)
+    logger.info("what type is list> '%s'", type(obj_list))
+    logger.info("Is objkey in objlist '%s'", obj_key in obj_list)
+
+    prefix = "hello there!"
     logger.info("Getting object list with prefix '%s'", prefix)
-    _ = obj_wrapper.list(bucket=bucket, prefix=prefix)
+    obj_list = obj_wrapper.list(bucket=bucket, prefix=prefix)
+
+    logger.info("Is list None? '%s'", obj_list is None)
+    logger.info("what type is list> '%s'", type(obj_list))
+    logger.info("Is objkey in objlist '%s'", obj_key in obj_list)
 
     wl_bytes = obj_wrapper.get()
     wl_dict = json.loads(wl_bytes.decode("utf8").replace("'", '"'))

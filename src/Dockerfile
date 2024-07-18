@@ -20,6 +20,7 @@ COPY constants.py ./src/
 COPY exceptions.py ./src/
 COPY main.py ./src/
 COPY objectwrapper.py ./src/
-COPY objectwrapper.py ./src/
+COPY secretswrapper.py ./src/
 
-CMD [ "./src/main.lambda_handler" ] 
+WORKDIR "/src"
+CMD [ "main.lambda_handler" ] 

@@ -19,9 +19,9 @@ from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
-from src.constants import DateFormats, URLConstants, DataFileDictFormat
-from src.objectwrapper import ObjectWrapper
-from src.secretswrapper import GetSecretWrapper
+from constants import DateFormats, URLConstants, DataFileDictFormat
+from objectwrapper import ObjectWrapper
+from secretswrapper import GetSecretWrapper
 
 logger = logging.getLogger(__name__)
 logger.setLevel("INFO")

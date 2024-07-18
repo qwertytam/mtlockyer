@@ -224,6 +224,61 @@ class ObjectWrapper:
             raise
 
 
+class GetSecretWrapper:
+    """
+    AWS  Secrets Manager wrapper
+    """
+    def __init__(self, secretsmanager_client):
+        self.client = secretsmanager_client
+
+    def get_secret(self, secret_name: str):
+        """
+        Retrieve individual secrets from AWS Secrets Manager using the
+        get_secret_value API.
+
+        Args:
+            secret_name: The name of the secret fetched
+        """
+        print("Entering get_secret()")
+        try:
+            get_secret_value_response = self.client.get_secret_value(
+                SecretId=secret_name
+            )
+            print("Secret retrieved successfully.")
+            logging.info("Secret retrieved successfully.")
+            return get_secret_value_response["SecretString"]
+        except self.client.exceptions.ResourceNotFoundException:
+            msg = f"The requested secret {secret_name} was not found."
+            logger.info(msg)
+            return msg
+        except Exception as e:
+            logger.error("An unknown error occurred: '%s'", e, exc_info=True)
+            raise
+
+
+def get_aws_secret(secret_name: str):
+    """
+    Retrieve a secret from AWS Secrets Manager
+
+    Args:
+        secret_name: Name of the secret to retrieve
+    """
+    print("Entering get_aws_secret()")
+    try:
+        if not secret_name:
+            raise ValueError("Secret name must be provided.")
+
+        client = boto3.client("secretsmanager")
+        wrapper = GetSecretWrapper(client)
+        print("Trying wrapper.get_secret()")
+        secret = wrapper.get_secret(secret_name)
+        # Note: Secrets should not be logged.
+        return secret
+    except Exception as e:
+        logging.error("Error retrieving secret: '%s'", e, exc_info=True)
+        raise
+
+
 def initialise_driver(
     binary_location="/opt/chrome/chrome-linux64/chrome",
     executable_path="/opt/chrome-driver/chromedriver-linux64/chromedriver",
@@ -266,23 +321,20 @@ def initialise_driver(
     print("Finished adding options")
 
     chrome_options.binary_location = binary_location
-    print("added binary location")
+    print("Added binary location")
 
     if isinstance(service_log_path, str) and isinstance(executable_path, str):
-        print("adding executable and serivce log path")
+        print("Adding executable and serivce log path")
         service = Service(
             executable_path=executable_path,
             service_log_path=service_log_path,
         )
-        print("calling webdriver.Chrome")
+        print("Calling webdriver.Chrome")
         driver = webdriver.Chrome(service=service, options=chrome_options)
     else:
-        print("not adding service")
-        print("calling webdriver.Chrome")
+        print("Not adding service")
+        print("Calling webdriver.Chrome")
         driver = webdriver.Chrome(options=chrome_options)
-
-
-    
 
     return driver
 
@@ -561,7 +613,7 @@ def get_saved_waitlist_posn(wl_dict: dict) -> str:
         Waitlist position
     """
     print(f"wl_dict is type '{type(wl_dict)}' with string output:\n{wl_dict}")
-    
+
     for k in wl_dict.keys():
         print(f"k: '{k}' v: '{wl_dict[k]}'")
     return wl_dict["waitlist_position"]
@@ -623,7 +675,8 @@ def compare_waitlist_posns(
     if has_changed:
         save_waitlist_posn(posn, dt_now, dt_now, file_path, s3_bucket_object)
     else:
-        existing_date = get_saved_waitlist_datetime(wl_data).strftime(str(DateFormats.DEFAULT.value))
+        existing_date = get_saved_waitlist_datetime(wl_data).strftime(
+            str(DateFormats.DEFAULT.value))
         save_waitlist_posn(wl_posn, existing_date, dt_now, file_path, s3_bucket_object)
 
     return has_changed
@@ -641,10 +694,14 @@ def lambda_handler(event, context):
         Status response dictionary
     """
     print(f"Entered `lambda_handler()` with '{event}' and {context}")
-
     site_un = event.get("site-un", "")
-    site_pw = event.get("site-pw", "")
-    student_id = event.get("student-id", "")
+
+    print("Getting secrets")
+    aws_secrets = get_aws_secret("mtlockeyer-aws-secrets")
+    site_pw = aws_secrets.get("site-pw", "")
+    student_id = aws_secrets.get("student-id")
+
+    print(f"Using un {site_un} pw {site_pw} student_id {student_id} from aws_secrets {aws_secrets}")
 
     print("Initialising driver")
     driver = initialise_driver()
@@ -667,22 +724,24 @@ def lambda_handler(event, context):
           f"bucket '{s3_bucket}' and object '{s3_object_key}'")
     s3_bucket_object = {'bucket': s3_bucket, 'object_key': s3_object_key}
     has_changed = compare_waitlist_posns(wl_posn, s3_bucket_object=s3_bucket_object)
-    print(f"has_change?: '{has_changed}'")
+    print(f"has_changed?: '{has_changed}'")
 
     driver.quit()
 
-    sns_topic_arn = event.get("sns-topic-arn", "")
-    subject_text = f"There is {'a' if has_changed else 'no'} change in waitlist position at number {wl_posn}"
-    body_text = f"Sent at {dt.now().astimezone(tz.utc).strftime(str(DateFormats.DEFAULT.value))}"
+    if has_changed:
+        sns_topic_arn = event.get("sns-topic-arn", "")
+        subject_text = f"Now #{wl_posn} on the waitlist"
+        body_text = "Sent at " + \
+            f"{dt.now().astimezone(tz.utc).strftime(str(DateFormats.DEFAULT.value))}"
 
-    print(
-        "Trying email send from "
-        f"sns_topic_arn '{sns_topic_arn}' "
-        f"subject '{subject_text}' "
-        f"body '{body_text}' "
-    )
+        print(
+            "Trying email send from "
+            f"sns_topic_arn '{sns_topic_arn}' "
+            f"subject '{subject_text}' "
+            f"body '{body_text}' "
+        )
 
-    _ = send_email(sns_topic_arn, subject_text, body_text)
+        _ = send_email(sns_topic_arn, subject_text, body_text)
 
     response = {
         "statusCode": 200,

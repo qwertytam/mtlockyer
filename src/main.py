@@ -340,26 +340,13 @@ def __get_waitlist_from_file(file_path: Path) -> dict:
 def __get_waitlist_from_s3(s3_bucket_object: dict) -> dict:
     s3_resource = boto3.resource("s3")
     bucket = s3_resource.Bucket(s3_bucket_object["bucket"])
-    obj_wrapper = ObjectWrapper(bucket.Object(s3_bucket_object["object_key"]))
+    obj_key = s3_bucket_object["object_key"]
+    obj_wrapper = ObjectWrapper(bucket.Object(obj_key))
 
     logger.info("Getting object list")
-    obj_list = obj_wrapper.list(bucket=bucket)
+    obj_list = obj_wrapper.list(bucket=bucket, prefix=obj_key)
 
-    obj_key = s3_bucket_object["object_key"]
-
-    logger.info("Is list None? '%s'", obj_list is None)
-    logger.info("what type is list> '%s'", type(obj_list))
-    logger.info("Is objkey in objlist '%s'", obj_key in obj_list)
-
-    prefix = "hello there!"
-    logger.info("Getting object list with prefix '%s'", prefix)
-    obj_list = obj_wrapper.list(bucket=bucket, prefix=prefix)
-
-    logger.info("Is list None? '%s'", obj_list is None)
-    logger.info("what type is list> '%s'", type(obj_list))
-    logger.info("Is objkey in objlist '%s'", obj_key in obj_list)
-
-    if obj_list is None:
+    if obj_key not in obj_list:
         logger.info("Object not found; creating default wl dictionary")
         wl_dict = __create_empty_datafile()
         __save_waitlist_to_s3(wl_dict, s3_bucket_object)

@@ -1,6 +1,7 @@
 """Encapsulates S3 object actions"""
 
 import logging
+from typing import Optional
 
 from src.exceptions import ObjClientExceptions
 
@@ -80,7 +81,7 @@ class ObjectWrapper:
             return body
 
     @staticmethod
-    def list(bucket, prefix=None):
+    def list(bucket, prefix: Optional[str | None] = None) -> list:
         """
         Lists the objects in a bucket, optionally filtered by a prefix.
 

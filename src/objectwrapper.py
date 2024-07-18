@@ -118,6 +118,10 @@ class ObjectWrapper:
         Return:
             List of object names
         """
+        logger.info("Entering get_object_names")
+        for obj in obj_list:
+            logger.info("key attribute for obj is '%s'", obj.key)
+
         logger.info("Looking throgh list with 'Contens': %s", obj_list["Contents"])
         obj_names = [v.get("Key") for k, v in obj_list["Contents"].items()]
         return obj_names

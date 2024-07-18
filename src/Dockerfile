@@ -15,7 +15,11 @@ RUN pip install selenium
 # install other package dependencies
 RUN pip install beautifulsoup4
 
-COPY main.py ./
-COPY constants.py ./
+COPY __init__.py ./src/
+COPY constants.py ./src/
+COPY exceptions.py ./src/
+COPY main.py ./src/
+COPY objectwrapper.py ./src/
+COPY objectwrapper.py ./src/
 
-CMD [ "main.lambda_handler" ] 
+CMD [ "./src/main.lambda_handler" ] 

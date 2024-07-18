@@ -388,10 +388,7 @@ def login(url: str, un: str, pw: str, driver, timeout: int = 5) -> bool:
         True if logged in successfully, otherwise False
     """
 
-    print("Logger test")
-    logger.info("logger.info:: Start login %s", url)
-    logger("logger:: Start login %s", url)
-    print(f"Starting login: url '{url}' un '{un}'")
+    logger.info("Start login to '%s'", url)
     driver.get(url)
 
     wbd_wait = WebDriverWait(driver, timeout)
@@ -406,8 +403,7 @@ def login(url: str, un: str, pw: str, driver, timeout: int = 5) -> bool:
             (By.XPATH, ".//button[@class='button' and @type='submit']")
         )
     ).click()
-    # logger.info("Entered login credentials")
-    print("Entered login credentials")
+    logger.info("Entered login credentials")
 
     logged_in = _check_logged_in(wbd_wait)
 
@@ -670,35 +666,34 @@ def lambda_handler(event, context):
     Returns:
         Status response dictionary
     """
-    print(f"Entered `lambda_handler()` with '{event}' and {context}")
+    logger.info("Entered `lambda_handler()` with '%s' and '%s'", event, context)
     site_un = event.get("site-un", "")
 
     aws_secrets = json.loads(get_aws_secret("mtlockeyer-aws-secrets"))
     site_pw = aws_secrets.get("site-pw", "")
     student_id = aws_secrets.get("student-id", "")
 
-    print("Initialising driver")
+    logger.info("Initialising driver")
     driver = initialise_driver()
 
-    print("Logging in")
     logged_in = login(str(URLConstants.LOGIN_URL.value), site_un, site_pw, driver)
-    print(f"Was login a succes? {logged_in}")
+    logger.info("Was login a succes? '%s'", logged_in)
 
-    print("Going to waitlist")
+    logger.info("Going to waitlist")
     driver = go_to_waitlist(student_id, driver)
 
-    print("Getting waitlist position")
+    logger.info("Getting waitlist position")
     wl_posn = get_latest_waitlist_posn(driver.page_source)
-    print(f"Waitlist position wl_posn: {wl_posn}")
+    logger.info("Waitlist position wl_posn: '%s'", wl_posn)
 
     s3_bucket = event.get("s3-bucket", "")
     s3_object_key = event.get("s3-object-key", "")
 
-    print("Checking if waitlist position has changed on "
-          f"bucket '{s3_bucket}' and object '{s3_object_key}'")
+    logger.info("Checking if waitlist position has changed on "
+          "bucket '%s' and object '%s'", s3_bucket, s3_object_key)
     s3_bucket_object = {'bucket': s3_bucket, 'object_key': s3_object_key}
     has_changed = compare_waitlist_posns(wl_posn, s3_bucket_object=s3_bucket_object)
-    print(f"has_changed?: '{has_changed}'")
+    logger.info("has_changed?: '%s'", has_changed)
 
     driver.quit()
 
@@ -708,11 +703,11 @@ def lambda_handler(event, context):
         body_text = "Sent at " + \
             f"{dt.now().astimezone(tz.utc).strftime(str(DateFormats.DEFAULT.value))}"
 
-        print(
+        logger.info(
             "Trying email send from "
-            f"sns_topic_arn '{sns_topic_arn}' "
-            f"subject '{subject_text}' "
-            f"body '{body_text}' "
+            "sns_topic_arn '%s' "
+            "subject '%s' "
+            "body '%s' ", sns_topic_arn, subject_text, body_text
         )
 
         _ = send_email(sns_topic_arn, subject_text, body_text)

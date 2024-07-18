@@ -61,8 +61,10 @@ class ObjectWrapper:
         try:
             self.object.put(Body=put_data)
             self.object.wait_until_exists()
-            print(
-                f"Put object '{self.object.key}' to bucket '{self.object.bucket_name}'."
+            logger.info(
+                "Put object '%s' to bucket '%s'",
+                self.object.key,
+                self.object.bucket_name,
             )
         except ObjClientExceptions:
             logger.exception(
@@ -84,7 +86,7 @@ class ObjectWrapper:
         """
         try:
             body = self.object.get()["Body"].read()
-            print(
+            logger.info(
                 "Got object '%s' from bucket '%s'.",
                 self.object.key,
                 self.object.bucket_name,
@@ -117,7 +119,7 @@ class ObjectWrapper:
                 objects = list(bucket.objects.all())
             else:
                 objects = list(bucket.objects.filter(Prefix=prefix))
-            print(
+            logger.info(
                 "Got objects %s from bucket '%s'", [o.key for o in objects], bucket.name
             )
         except ObjClientExceptions:
@@ -133,7 +135,7 @@ class ObjectWrapper:
         try:
             self.object.delete()
             self.object.wait_until_not_exists()
-            print(
+            logger.info(
                 "Deleted object '%s' from bucket '%s'.",
                 self.object.key,
                 self.object.bucket_name,
@@ -164,7 +166,7 @@ class ObjectWrapper:
                 Delete={"Objects": [{"Key": key} for key in object_keys]}
             )
             if "Deleted" in response:
-                print(
+                logger.info(
                     "Deleted objects '%s' from bucket '%s'.",
                     [del_obj["Key"] for del_obj in response["Deleted"]],
                     bucket.name,
@@ -194,7 +196,7 @@ class ObjectWrapper:
         """
         try:
             bucket.objects.delete()
-            print("Emptied bucket '%s'.", bucket.name)
+            logger.info("Emptied bucket '%s'.", bucket.name)
         except ObjClientExceptions:
             logger.exception("Couldn't empty bucket '%s'.", bucket.name)
             raise
@@ -204,6 +206,7 @@ class GetSecretWrapper:
     """
     AWS  Secrets Manager wrapper
     """
+
     def __init__(self, secretsmanager_client):
         self.client = secretsmanager_client
 
@@ -215,7 +218,7 @@ class GetSecretWrapper:
         Args:
             secret_name: The name of the secret fetched
         """
-        print("Entering get_secret()")
+        logger.info("Entering get_secret()")
         try:
             get_secret_value_response = self.client.get_secret_value(
                 SecretId=secret_name
@@ -269,10 +272,10 @@ def initialise_driver(
     Returns:
         Selenium Chrome web driver
     """
-    print("Initialising driver")
+    logger.info("Initialising driver")
     chrome_options = ChromeOptions()
     if options is None:
-        print("Using default options")
+        logger.info("Using default options")
         chrome_options.add_argument("--headless=new")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
@@ -288,25 +291,25 @@ def initialise_driver(
         chrome_options.add_argument("--log-path=/tmp")
         chrome_options.add_argument("--disable-software-rasterizer")
     else:
-        print(f"Using passed options {options}")
+        logger.info("Using passed options '%s'", options)
         for option in options:
             chrome_options.add_argument(option)
-    print("Finished adding options")
+    logger.info("Finished adding options")
 
     chrome_options.binary_location = binary_location
-    print("Added binary location")
+    logger.info("Added binary location")
 
     if isinstance(service_log_path, str) and isinstance(executable_path, str):
-        print("Adding executable and serivce log path")
+        logger.info("Adding executable and serivce log path")
         service = Service(
             executable_path=executable_path,
             service_log_path=service_log_path,
         )
-        print("Calling webdriver.Chrome")
+        logger.info("Calling webdriver.Chrome")
         driver = webdriver.Chrome(service=service, options=chrome_options)
     else:
-        print("Not adding service")
-        print("Calling webdriver.Chrome")
+        logger.info("Not adding service")
+        logger.info("Calling webdriver.Chrome")
         driver = webdriver.Chrome(options=chrome_options)
 
     return driver
@@ -332,7 +335,7 @@ def send_email(sns_topic_arn, subject_text, body_text):
         Message=body_text,
     )
 
-    print(f"Email sent with response: {response}")
+    logger.info("Email sent with response: '%s'", response)
 
     return {
         "statusCode": 200,
@@ -365,11 +368,11 @@ def _check_logged_in(wbd_wait) -> bool:
             )
         )
         # logger.info("basic-card; assumed login successful")
-        print("basic-card; assumed login successful")
+        logger.info("basic-card; assumed login successful")
         logged_in = True
     except TimeoutException:
         # logger.error("TimeoutException: Assuming wrong credentials; exiting")
-        print("TimeoutException: Assuming wrong credentials; exiting")
+        logger.info("TimeoutException: Assuming wrong credentials; exiting")
     return logged_in
 
 
@@ -425,7 +428,10 @@ def go_to_waitlist(
         Driver on waitlist page
     """
     url = (
-        str(URLConstants.BASE_URL.value) + student_id + "/" + str(URLConstants.WAITLIST_PAGE.value)
+        str(URLConstants.BASE_URL.value)
+        + student_id
+        + "/"
+        + str(URLConstants.WAITLIST_PAGE.value)
     )
     driver.get(url)
     wbd_wait = WebDriverWait(driver, timeout)
@@ -454,7 +460,7 @@ def __save_waitlist_to_file(wl_dict: dict, file_path: Path):
     with open(file_path, "w", encoding="utf8") as json_file:
         json.dump(wl_dict, json_file, indent=4)
 
-    print(f"Have written '{wl_dict}' to '{file_path}")
+    logger.info("Have written '%s' to '%s", wl_dict, file_path)
 
 
 def __save_waitlist_to_s3(wl_dict: dict, s3_bucket_object: dict):
@@ -463,15 +469,17 @@ def __save_waitlist_to_s3(wl_dict: dict, s3_bucket_object: dict):
     obj_wrapper = ObjectWrapper(bucket.Object(s3_bucket_object["object_key"]))
     obj_wrapper.put(bytes(json.dumps(wl_dict, indent=4).encode(encoding="utf-8")))
 
-    print(f"Have put '{wl_dict}' into object '{s3_bucket_object["object_key"]}'")
+    logger.info(
+        "Have put '%s' into object '%s'", wl_dict, s3_bucket_object["object_key"]
+    )
 
 
 def save_waitlist_posn(
     posn: str,
     wl_date: str,
     last_update: str,
-    file_path: Optional[Path]=None,
-    s3_bucket_object: Optional[dict]=None,
+    file_path: Optional[Path] = None,
+    s3_bucket_object: Optional[dict] = None,
 ):
     """
     Save waitlist position to json file
@@ -497,12 +505,12 @@ def save_waitlist_posn(
     }
     # logger.debug("Saving waitlist position to '%s'", file_path)
     if file_path is not None:
-        print("Saving waitlist position to file")
+        logger.info("Saving waitlist position to file")
         __save_waitlist_to_file(wl_dict, file_path)
     else:
         if s3_bucket_object is None:
             s3_bucket_object = {"bucket": "", "object_key": ""}
-        print("Saving waitlist position to s3")
+        logger.info("Saving waitlist position to s3")
         __save_waitlist_to_s3(wl_dict, s3_bucket_object)
 
 
@@ -521,14 +529,13 @@ def __get_waitlist_from_file(file_path: Path) -> dict:
             wl_dict = json.load(json_file)
     except FileNotFoundError:
         # logger.info("File not found; returning default wl dictionary")
-        print("File not found; returning default wl dictionary")
+        logger.info("File not found; returning default wl dictionary")
         wl_dict = DataFileDictFormat.DEFAULT_WL_DICT.value
         dt_now = dt.now().astimezone(tz.utc).strftime(str(DateFormats.DEFAULT.value))
         wl_dict["waitlist_datetime"] = dt_now
         wl_dict["last_updated"] = dt_now
 
-
-    print(f"Found file '{file_path}'; returning data")
+    logger.info("Found file '%s'; returning data", file_path)
     return wl_dict
 
 
@@ -537,19 +544,27 @@ def __get_waitlist_from_s3(s3_bucket_object: dict) -> dict:
     bucket = s3_resource.Bucket(s3_bucket_object["bucket"])
     obj_wrapper = ObjectWrapper(bucket.Object(s3_bucket_object["object_key"]))
 
-    obj_list = obj_wrapper.list(bucket=bucket)
+    logger.info("Getting object list")
+    _ = obj_wrapper.list(bucket=bucket)
+
+    prefix = s3_bucket_object["object_key"]
+    logger.info("Getting object list with prefix '%s'", prefix)
+    _ = obj_wrapper.list(bucket=bucket, prefix=prefix)
 
     wl_bytes = obj_wrapper.get()
-    wl_dict = json.loads(wl_bytes.decode('utf8').replace("'", '"'))
+    wl_dict = json.loads(wl_bytes.decode("utf8").replace("'", '"'))
 
-    print(f"Found object '{s3_bucket_object}'; "
-          f"returning data:\n{json.dumps(wl_dict, indent=4)}\nEND")
+    logger.info(
+        "Found object '%s'; returning data:\n%s\nEND",
+        s3_bucket_object,
+        json.dumps(wl_dict, indent=4),
+    )
     return wl_dict
 
 
 def get_saved_waitlist_data(
-    file_path: Optional[Path]=None,
-    s3_bucket_object: Optional[dict]=None) -> dict:
+    file_path: Optional[Path] = None, s3_bucket_object: Optional[dict] = None
+) -> dict:
     """
     Get saved waitlist information from file or AWS S3 bucket object
 
@@ -564,12 +579,12 @@ def get_saved_waitlist_data(
     """
 
     if file_path is not None:
-        print("Getting waitlist position from file")
+        logger.info("Getting waitlist position from file")
         wl_dict = __get_waitlist_from_file(file_path)
     else:
         if s3_bucket_object is None:
             s3_bucket_object = {"bucket": "", "object_key": ""}
-        print("Getting waitlist position from s3")
+        logger.info("Getting waitlist position from s3")
         wl_dict = __get_waitlist_from_s3(s3_bucket_object)
 
     return wl_dict
@@ -585,10 +600,10 @@ def get_saved_waitlist_posn(wl_dict: dict) -> str:
     Returns
         Waitlist position
     """
-    print(f"wl_dict is type '{type(wl_dict)}' with string output:\n{wl_dict}")
+    logger.info("wl_dict is type '%s' with string output:\n%s", type(wl_dict), wl_dict)
 
     for k in wl_dict.keys():
-        print(f"k: '{k}' v: '{wl_dict[k]}'")
+        logger.info("k: '%s' v: '%s'", k, wl_dict[k])
     return wl_dict["waitlist_position"]
 
 
@@ -619,7 +634,8 @@ def get_saved_waitlist_last_update(wl_dict: dict) -> dt:
 
 
 def compare_waitlist_posns(
-    posn: str, file_path: Optional[Path]=None, s3_bucket_object: Optional[dict]=None) -> bool:
+    posn: str, file_path: Optional[Path] = None, s3_bucket_object: Optional[dict] = None
+) -> bool:
     """
     Check if waitlist position has changed; if changed, updates json file
     that contains waitlist information
@@ -649,7 +665,8 @@ def compare_waitlist_posns(
         save_waitlist_posn(posn, dt_now, dt_now, file_path, s3_bucket_object)
     else:
         existing_date = get_saved_waitlist_datetime(wl_data).strftime(
-            str(DateFormats.DEFAULT.value))
+            str(DateFormats.DEFAULT.value)
+        )
         save_waitlist_posn(wl_posn, existing_date, dt_now, file_path, s3_bucket_object)
 
     return has_changed
@@ -689,9 +706,12 @@ def lambda_handler(event, context):
     s3_bucket = event.get("s3-bucket", "")
     s3_object_key = event.get("s3-object-key", "")
 
-    logger.info("Checking if waitlist position has changed on "
-          "bucket '%s' and object '%s'", s3_bucket, s3_object_key)
-    s3_bucket_object = {'bucket': s3_bucket, 'object_key': s3_object_key}
+    logger.info(
+        "Checking if waitlist position has changed on bucket '%s' and object '%s'",
+        s3_bucket,
+        s3_object_key,
+    )
+    s3_bucket_object = {"bucket": s3_bucket, "object_key": s3_object_key}
     has_changed = compare_waitlist_posns(wl_posn, s3_bucket_object=s3_bucket_object)
     logger.info("has_changed?: '%s'", has_changed)
 
@@ -700,14 +720,19 @@ def lambda_handler(event, context):
     if has_changed:
         sns_topic_arn = event.get("sns-topic-arn", "")
         subject_text = f"Now #{wl_posn} on the waitlist"
-        body_text = "Sent at " + \
-            f"{dt.now().astimezone(tz.utc).strftime(str(DateFormats.DEFAULT.value))}"
+        body_text = (
+            "Sent at "
+            + f"{dt.now().astimezone(tz.utc).strftime(str(DateFormats.DEFAULT.value))}"
+        )
 
         logger.info(
             "Trying email send from "
             "sns_topic_arn '%s' "
             "subject '%s' "
-            "body '%s' ", sns_topic_arn, subject_text, body_text
+            "body '%s' ",
+            sns_topic_arn,
+            subject_text,
+            body_text,
         )
 
         _ = send_email(sns_topic_arn, subject_text, body_text)
@@ -715,7 +740,7 @@ def lambda_handler(event, context):
     response = {
         "statusCode": 200,
         "headers": {"Content-Type": "application/json"},
-        "body": {"message":  "completed"},
+        "body": {"message": "completed"},
     }
 
     return response

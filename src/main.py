@@ -97,6 +97,7 @@ def initialise_driver(
     else:
         driver = webdriver.Chrome(options=chrome_options)
 
+    logger.info("Driver initialised; returning")
     return driver
 
 
@@ -327,20 +328,16 @@ def __get_waitlist_from_s3(s3_bucket_object: dict) -> dict:
     obj_key = s3_bucket_object["object_key"]
     obj_wrapper = ObjectWrapper(bucket.Object(obj_key))
 
-    logger.info("Getting object list")
     obj_list = obj_wrapper.list(bucket=bucket, prefix=obj_key)
-
     obj_names = obj_wrapper.get_object_names(obj_list)
     logger.info("Found obj names: '%s'", obj_names)
 
     if obj_key not in obj_names:
         logger.info(
-            "obj_key '%s' type '%s' not found in "
-            "list '%s' with types '%s'; creating default wl dictionary",
+            "object key '%s' not found in object names '%s';"
+            " creating default wl dictionary",
             obj_key,
-            type(obj_key),
             obj_names,
-            type(obj_names[0]),
         )
         wl_dict = __create_empty_datafile()
         __save_waitlist_to_s3(wl_dict, s3_bucket_object)
@@ -349,9 +346,8 @@ def __get_waitlist_from_s3(s3_bucket_object: dict) -> dict:
     wl_dict = json.loads(wl_bytes.decode("utf8").replace("'", '"'))
 
     logger.info(
-        "Found object '%s'; returning data:\n%s\nEND",
+        "Found object '%s'; returning data",
         s3_bucket_object,
-        json.dumps(wl_dict, indent=4),
     )
     return wl_dict
 
@@ -392,8 +388,6 @@ def get_saved_waitlist_posn(wl_dict: dict) -> str:
     Returns
         Waitlist position
     """
-    for k in wl_dict.keys():
-        logger.info("k: '%s' v: '%s'", k, wl_dict[k])
     return wl_dict["waitlist_position"]
 
 

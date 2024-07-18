@@ -22,7 +22,6 @@ class GetSecretWrapper:
         Args:
             secret_name: The name of the secret fetched
         """
-        logger.info("Entering get_secret()")
         try:
             get_secret_value_response = self.client.get_secret_value(
                 SecretId=secret_name

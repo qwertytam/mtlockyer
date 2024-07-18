@@ -32,11 +32,9 @@ def lambda_handler(event, context):
     site_pw = aws_secrets.get("site-pw", "")
     student_id = aws_secrets.get("student-id", "")
 
-    logger.info("Initialising driver")
     driver = initialise_driver()
 
     logged_in = login(str(URLConstants.LOGIN_URL.value), site_un, site_pw, driver)
-    logger.info("Was login a succes? '%s'", logged_in)
 
     driver = go_to_waitlist(student_id, driver)
 
@@ -49,7 +47,7 @@ def lambda_handler(event, context):
 
     s3_bucket_object = {"bucket": s3_bucket, "object_key": s3_object_key}
     has_changed = compare_waitlist_posns(wl_posn, s3_bucket_object=s3_bucket_object)
-    logger.info("has_changed?: '%s'", has_changed)
+    logger.info("Has waitlist position changed?: '%s'", has_changed)
 
     driver.quit()
 

@@ -118,10 +118,7 @@ class ObjectWrapper:
         Return:
             List of object names
         """
-        logger.info("Entering get_object_names")
-        obj_names = [obj.key for obj in obj_list]
-        logger.info("Found names '%s' of length %s", obj_names, len(obj_names))
-        return obj_names
+        return [obj.key for obj in obj_list]
 
     def delete(self):
         """

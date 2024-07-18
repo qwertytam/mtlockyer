@@ -107,6 +107,21 @@ class ObjectWrapper:
         else:
             return objects
 
+    @staticmethod
+    def get_object_names(obj_list):
+        """
+        Returns list of object names from provided object list
+
+        Args:
+            object_list: List of objects to get names
+
+        Return:
+            List of object names
+        """
+        logger.info("Looking throgh list with 'Contens': %s", obj_list["Contents"])
+        obj_names = [v.get("Key") for k, v in obj_list["Contents"].items()]
+        return obj_names
+
     def delete(self):
         """
         Deletes the object

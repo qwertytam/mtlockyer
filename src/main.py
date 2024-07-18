@@ -330,9 +330,13 @@ def __get_waitlist_from_s3(s3_bucket_object: dict) -> dict:
     logger.info("Getting object list")
     obj_list = obj_wrapper.list(bucket=bucket, prefix=obj_key)
 
+    obj_names = obj_wrapper.get_object_names(obj_list)
+    logger.info("Found obj names: '%s'", obj_names)
+
     if obj_key not in obj_list:
         logger.info(
-            "obj_key '%s' type '%s' not found in list '%s' with types '%s'; creating default wl dictionary",
+            "obj_key '%s' type '%s' not found in "
+            "list '%s' with types '%s'; creating default wl dictionary",
             obj_key,
             type(obj_key),
             obj_list,

@@ -698,6 +698,8 @@ def lambda_handler(event, context):
 
     print("Getting secrets")
     aws_secrets = get_aws_secret("mtlockeyer-aws-secrets")
+    
+    print(f"Retreieved: '{aws_secrets}'")
     site_pw = aws_secrets.get("site-pw", "")
     student_id = aws_secrets.get("student-id")
 

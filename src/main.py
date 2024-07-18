@@ -231,7 +231,7 @@ class GetSecretWrapper:
     def __init__(self, secretsmanager_client):
         self.client = secretsmanager_client
 
-    def get_secret(self, secret_name: str):
+    def get_secret(self, secret_name: str) -> str:
         """
         Retrieve individual secrets from AWS Secrets Manager using the
         get_secret_value API.
@@ -256,7 +256,7 @@ class GetSecretWrapper:
             raise
 
 
-def get_aws_secret(secret_name: str):
+def get_aws_secret(secret_name: str) -> str:
     """
     Retrieve a secret from AWS Secrets Manager
 
@@ -697,7 +697,7 @@ def lambda_handler(event, context):
     site_un = event.get("site-un", "")
 
     print("Getting secrets")
-    aws_secrets = get_aws_secret("mtlockeyer-aws-secrets")
+    aws_secrets = json.loads(get_aws_secret("mtlockeyer-aws-secrets"))
     
     print(f"Retreieved: '{aws_secrets}' of type '{type(aws_secrets)}'")
     site_pw = aws_secrets.get("site-pw", "")

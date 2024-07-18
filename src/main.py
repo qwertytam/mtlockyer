@@ -540,6 +540,9 @@ def __get_waitlist_from_s3(s3_bucket_object: dict) -> dict:
     s3_resource = boto3.resource("s3")
     bucket = s3_resource.Bucket(s3_bucket_object["bucket"])
     obj_wrapper = ObjectWrapper(bucket.Object(s3_bucket_object["object_key"]))
+
+    obj_list = obj_wrapper.list(bucket=bucket)
+
     wl_bytes = obj_wrapper.get()
     wl_dict = json.loads(wl_bytes.decode('utf8').replace("'", '"'))
 

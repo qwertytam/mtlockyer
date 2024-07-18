@@ -23,6 +23,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from constants import DateFormats, URLConstants, DataFileDictFormat
 
 logger = logging.getLogger(__name__)
+logger.setLevel("INFO")
 
 
 class ObjClientExceptions(ClientError):
@@ -387,7 +388,9 @@ def login(url: str, un: str, pw: str, driver, timeout: int = 5) -> bool:
         True if logged in successfully, otherwise False
     """
 
-    logger.info("logger:: Start login %s", url)
+    print("Logger test")
+    logger.info("logger.info:: Start login %s", url)
+    logger("logger:: Start login %s", url)
     print(f"Starting login: url '{url}' un '{un}'")
     driver.get(url)
 

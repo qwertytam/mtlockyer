@@ -219,7 +219,6 @@ class GetSecretWrapper:
             get_secret_value_response = self.client.get_secret_value(
                 SecretId=secret_name
             )
-            print("Secret retrieved successfully.")
             logging.info("Secret retrieved successfully.")
             return get_secret_value_response["SecretString"]
         except self.client.exceptions.ResourceNotFoundException:
@@ -238,14 +237,12 @@ def get_aws_secret(secret_name: str) -> str:
     Args:
         secret_name: Name of the secret to retrieve
     """
-    print("Entering get_aws_secret()")
     try:
         if not secret_name:
             raise ValueError("Secret name must be provided.")
 
         client = boto3.client("secretsmanager")
         wrapper = GetSecretWrapper(client)
-        print("Trying wrapper.get_secret()")
         secret = wrapper.get_secret(secret_name)
         # Note: Secrets should not be logged.
         return secret
@@ -390,9 +387,8 @@ def login(url: str, un: str, pw: str, driver, timeout: int = 5) -> bool:
         True if logged in successfully, otherwise False
     """
 
-    # logger.info("Start login")
-    print(f"Starting login: url '{url}' un '{un}' pw '{pw}'")
-    print(f"types: url '{type(url)}' un '{type(un)}' pw '{type(pw)}'")
+    logger.info("logger:: Start login %s", url)
+    print(f"Starting login: url '{url}' un '{un}'")
     driver.get(url)
 
     wbd_wait = WebDriverWait(driver, timeout)
@@ -671,14 +667,9 @@ def lambda_handler(event, context):
     print(f"Entered `lambda_handler()` with '{event}' and {context}")
     site_un = event.get("site-un", "")
 
-    print("Getting secrets")
     aws_secrets = json.loads(get_aws_secret("mtlockeyer-aws-secrets"))
-    
-    print(f"Retreieved: '{aws_secrets}' of type '{type(aws_secrets)}'")
     site_pw = aws_secrets.get("site-pw", "")
-    student_id = aws_secrets.get("student-id")
-
-    print(f"Using un {site_un} pw {site_pw} student_id {student_id} from aws_secrets {aws_secrets}")
+    student_id = aws_secrets.get("student-id", "")
 
     print("Initialising driver")
     driver = initialise_driver()

@@ -43,8 +43,8 @@ def main(fp: Path):
     wl_posn = get_latest_waitlist_posn(driver.page_source)
     print(f"wl_posn: {wl_posn}")
 
-    has_changed = compare_waitlist_posns(wl_posn, file_path=fp)
-    print(f"has_changed: {has_changed}")
+    has_changed, old_wl_posn = compare_waitlist_posns(wl_posn, file_path=fp)
+    print(f"has_changed: {has_changed} it was {old_wl_posn} and is now {wl_posn}")
 
     driver.quit()
 

@@ -6,7 +6,6 @@ import { Construct } from 'constructs';
 
 export interface InfraStackProps extends StackProps {
   applicationTag: string;
-  apiKey: string;
   fullName: string;
   pascalCaseFullName: string;
 }
@@ -25,35 +24,5 @@ export class InfraStack extends Stack {
 
     Tags.of(lambdaFunction).add("Customer", props.applicationTag);
 
-    // const gateway = new LambdaRestApi(this, `${props.pascalCaseFullName}Gateway`, {
-    //   handler: lambdaFunction,
-    //   proxy: false
-    // });
-
-    // Tags.of(gateway).add("Customer", props.applicationTag);
-
-    // const integration = new LambdaIntegration(lambdaFunction);
-    // gateway.root.addMethod("GET", integration, {
-    //   apiKeyRequired: true
-    // });
-
-    // const usagePlan = gateway.addUsagePlan(`${props.pascalCaseFullName}UsagePlan`, {
-    //   name: `${props.fullName}-usage-plan`,
-    //   quota: {
-    //     limit: 100,
-    //     period: Period.DAY
-    //   }
-    // });
-
-    // const apiKey = gateway.addApiKey(`${props.pascalCaseFullName}ApiKey`, {
-    //   apiKeyName: `${props.fullName}-api-key`,
-    //   value: props.apiKey
-    // });
-
-    // usagePlan.addApiKey(apiKey);
-
-    // usagePlan.addApiStage({
-    //   stage: gateway.deploymentStage,
-    // });
   }
 }

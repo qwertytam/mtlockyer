@@ -6,7 +6,6 @@ const app = new cdk.App();
 
 const props = {
     name: app.node.tryGetContext("name"),
-    apiKey: app.node.tryGetContext("apiKey"),
     applicationTag: app.node.tryGetContext("applicationTag"),
     env: {
         account: app.node.tryGetContext("accountId"),

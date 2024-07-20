@@ -10,7 +10,6 @@ if [[ -d "infra" ]]; then
         --context name=${APPLICATION_NAME} \
         --context accountId=${AWS_ACCOUNT_ID} \
         --context region=${AWS_REGION} \
-        --context apiKey=${API_KEY} \
         --context applicationTag=${APPLICATION_TAG} \
         --all \
         --require-approval never

@@ -9,7 +9,6 @@ test("Lambda and API Gateway Created", () => {
     fullName: "test-test",
     pascalCaseFullName: "TestTest",
     applicationTag: "app-tag-test",
-    apiKey: "crackTheCode123"
   });
   // THEN
 

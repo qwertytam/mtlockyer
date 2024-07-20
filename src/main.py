@@ -234,7 +234,12 @@ def get_latest_waitlist_posn(html_content: str) -> str:
     """
     soup = bs(html_content, "html.parser")
     el = soup.find_all(string=lambda text: "WAITLIST POSITION:" in text, limit=1)
-    return el[0].parent.b.contents[0]
+    if len(el) == 0:
+        wl_posn = "0"
+    else:
+        wl_posn = el[0].parent.b.contents[0]
+
+    return wl_posn
 
 
 def __save_waitlist_to_file(wl_dict: dict, file_path: Path):
@@ -410,7 +415,7 @@ def get_saved_waitlist_last_update(wl_dict: dict) -> dt:
 
 def compare_waitlist_posns(
     posn: str, file_path: Optional[Path] = None, s3_bucket_object: Optional[dict] = None
-) -> bool:
+) -> tuple[bool, str]:
     """
     Check if waitlist position has changed; if changed, updates json file
     that contains waitlist information
@@ -423,7 +428,7 @@ def compare_waitlist_posns(
         For s3_bucket_object, requires keys {'bucket': bucket, 'object_key': object_key}
 
     Returns
-        True if waitlist position has changed
+        Tuple of (True if waitlist position has changed, new waitlist position)
     """
     has_changed = False
 

@@ -19,7 +19,7 @@ const pascalCaseFullName = fullName.split("-")
     .map((word, index) =>
         index === 0 ? word.toLowerCase() : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join('');
-console.log('test infra.ts 01')
+
 const infraStack = new InfraStack(
     app,
     pascalCaseFullName,
@@ -29,5 +29,5 @@ const infraStack = new InfraStack(
         pascalCaseFullName: pascalCaseFullName
     }
 );
-console.log('test infra.ts 02')
+
 cdk.Tags.of(infraStack).add("Customer", props.applicationTag);

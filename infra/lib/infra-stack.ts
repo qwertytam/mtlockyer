@@ -27,13 +27,12 @@ export class InfraStack extends Stack {
     const topic = new Topic(this, 'mtlockyer-sns-topic', {
       displayName: 'Mtlockyer SNS topic',
     });
-    console.log('Log test 1');
+
     // const emailAddress = new CfnParameter(this, 'test@testing.gmail.com', { type: 'String' });
-    console.log('Log test 2');
-    // topic.addSubscription(new EmailSubscription(emailAddress.valueAsString));
-    topic.addSubscription(new EmailSubscription(`${props.pascalCaseFullName}SeleniumLambda`));
-    console.log('Log test 3');
+
+    topic.addSubscription(new EmailSubscription('test@testing.gmail.com'));
+
     Tags.of(lambdaFunction).add("Customer", props.applicationTag);
-    console.log('Log test 4');
+
   }
 }

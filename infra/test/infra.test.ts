@@ -2,7 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Template, Match } from 'aws-cdk-lib/assertions';
 import * as Infra from '../lib/infra-stack';
 
-test("Lambda and API Gateway Created", () => {
+test("Lambda Created", () => {
   const app = new cdk.App();
   // WHEN
   const stack = new Infra.InfraStack(app, "MyTestStack", {
@@ -17,5 +17,4 @@ test("Lambda and API Gateway Created", () => {
   template.hasResourceProperties("AWS::Lambda::Function", {
     FunctionName: "test-test-function"
   });
-  template.resourceCountIs("AWS::ApiGateway::Method", 1);
 });

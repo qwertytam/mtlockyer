@@ -33,6 +33,6 @@ export class InfraStack extends Stack {
     topic.addSubscription(new EmailSubscription(emailAddress.valueAsString));
     console.log('Log test 3')
     Tags.of(lambdaFunction).add("Customer", props.applicationTag);
-
+    console.log('Log test 4')
   }
 }

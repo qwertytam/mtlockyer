@@ -30,7 +30,7 @@ export class InfraStack extends Stack {
 
     // const emailAddress = new CfnParameter(this, 'test@testing.gmail.com', { type: 'String' });
 
-    topic.addSubscription(new EmailSubscription('test@testing.gmail.com'));
+    topic.addSubscription(new EmailSubscription(props.emailNotification));
 
     Tags.of(lambdaFunction).add("Customer", props.applicationTag);
 

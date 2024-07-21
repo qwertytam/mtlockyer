@@ -28,8 +28,6 @@ export class InfraStack extends Stack {
       displayName: 'Mtlockyer SNS topic',
     });
 
-    // const emailAddress = new CfnParameter(this, 'test@testing.gmail.com', { type: 'String' });
-
     topic.addSubscription(new EmailSubscription(props.emailNotification));
 
     Tags.of(lambdaFunction).add("Customer", props.applicationTag);

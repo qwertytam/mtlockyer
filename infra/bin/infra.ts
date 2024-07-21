@@ -10,7 +10,8 @@ const props = {
     env: {
         account: app.node.tryGetContext("accountId"),
         region: app.node.tryGetContext("region"),
-    }
+    },
+    emailNotification: app.node.tryGetContext("emailNotification")
 };
 
 const fullName = `${props.applicationTag}-${props.name}-002`;

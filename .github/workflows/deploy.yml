@@ -10,6 +10,7 @@ env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   APPLICATION_TAG: ${{ vars.APPLICATION_TAG }}
   APPLICATION_NAME: ${{ vars.APPLICATION_NAME }}
+  EMAIL_NOTIFICATION: ${{ secrets.EMAIL_NOTIFICATION }}
 
 permissions:
   id-token: write # This is required for requesting the JWT

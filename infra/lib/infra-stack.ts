@@ -1,5 +1,6 @@
-import { Duration, Stack, StackProps, Tags } from 'aws-cdk-lib';
-// import { LambdaIntegration, LambdaRestApi, Period, RateLimitedApiKey } from 'aws-cdk-lib/aws-apigateway';
+import { Duration, Stack, StackProps, Tags, CfnParameter } from 'aws-cdk-lib';
+import { Topic } from 'aws-cdk-lib/aws-sns';
+import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { DockerImageCode, DockerImageFunction } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
@@ -8,6 +9,7 @@ export interface InfraStackProps extends StackProps {
   applicationTag: string;
   fullName: string;
   pascalCaseFullName: string;
+  emailNotification: string;
 }
 
 export class InfraStack extends Stack {
@@ -21,6 +23,14 @@ export class InfraStack extends Stack {
       memorySize: 512,
       logRetention: RetentionDays.ONE_WEEK
     });
+
+    const topic = new Topic(this, 'mtlockyer-sns-topic', {
+      displayName: 'Mtlockyer SNS topic',
+    });
+
+    const emailAddress = new CfnParameter(this, `${props.emailNotification}`);
+
+    topic.addSubscription(new EmailSubscription(emailAddress.valueAsString));
 
     Tags.of(lambdaFunction).add("Customer", props.applicationTag);
 

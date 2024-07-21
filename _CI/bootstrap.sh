@@ -16,5 +16,6 @@ if [[ -d "infra" ]]; then
         --context name=${APPLICATION_NAME} \
         --context accountId=${AWS_ACCOUNT_ID} \
         --context region=${AWS_REGION} \
-        --context applicationTag=${APPLICATION_TAG}
+        --context applicationTag=${APPLICATION_TAG} \
+        --contect emailNotification=${EMAIL_NOTIFICATION}
 fi

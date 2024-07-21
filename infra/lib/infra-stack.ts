@@ -28,7 +28,7 @@ export class InfraStack extends Stack {
       displayName: 'Mtlockyer SNS topic',
     });
 
-    const emailAddress = new CfnParameter(this, `${props.emailNotification}`);
+    const emailAddress = new CfnParameter(this, props.emailNotification);
 
     topic.addSubscription(new EmailSubscription(emailAddress.valueAsString));
 

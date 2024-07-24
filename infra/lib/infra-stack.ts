@@ -28,7 +28,12 @@ export class InfraStack extends Stack {
       displayName: 'Mtlockyer SNS topic',
     });
 
-    topic.addSubscription(new EmailSubscription(props.emailNotification, {json: true}));
+    const regexPat = /,|;/;
+    var emailAddresses = props.emailNotification.split(regexPat);
+
+    emailAddresses.forEach((emailAddr) => {
+        topic.addSubscription(new EmailSubscription(emailAddr, {json: true}));
+    });
 
     Tags.of(lambdaFunction).add("Customer", props.applicationTag);
 

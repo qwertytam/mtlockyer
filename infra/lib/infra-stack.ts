@@ -31,8 +31,10 @@ export class InfraStack extends Stack {
     const regexPat = /,|;/;
     var emailAddresses = props.emailNotification.split(regexPat);
 
-    emailAddresses.forEach((emailAddr) => {
+    emailAddresses.forEach((emailAddr, index) => {
         topic.addSubscription(new EmailSubscription(emailAddr, {json: true}));
+        index++;
+        console.log("Have added " + String(index) + " email addresses")
     });
 
     Tags.of(lambdaFunction).add("Customer", props.applicationTag);

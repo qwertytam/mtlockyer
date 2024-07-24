@@ -34,7 +34,7 @@ export class InfraStack extends Stack {
     emailAddresses.forEach((emailAddr, index) => {
         topic.addSubscription(new EmailSubscription(emailAddr, {json: true}));
         index++;
-        console.log("Have added " + String(index) + " email addresses")
+        console.log("Have added " + String(index) + " email addresses " + String(emailAddr.slice(0,5)) + "****"  + String(emailAddr.slice(-5)))
     });
 
     Tags.of(lambdaFunction).add("Customer", props.applicationTag);

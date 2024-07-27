@@ -14,7 +14,7 @@ const props = {
     emailNotification: app.node.tryGetContext("emailNotification"),
     siteUn: app.node.tryGetContext("siteUn"),
     s3Bucket: app.node.tryGetContext("s3Bucket"),
-    s3ObjectKey: app.node.tryGetContext("s3ObjKey")
+    s3ObjectKey: app.node.tryGetContext("s3ObjectKey")
 };
 
 console.log("infra.ts siteUn: '" + props.siteUn + "'")

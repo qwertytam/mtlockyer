@@ -98,7 +98,7 @@ export class InfraStack extends Stack {
   schedulerRole.attachInlinePolicy(invokeLambdaPolicy);
 
   schedulerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'));
-  schedulerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AWSLambdaBasicExecutionRole'));
+  schedulerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'));
 
   Tags.of(lambdaFunction).add("Customer", props.applicationTag);
 

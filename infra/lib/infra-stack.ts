@@ -62,7 +62,7 @@ export class InfraStack extends Stack {
         ScheduleExpression: "rate(5 minutes)",
         Target: {
           Arn: lambdaFunction.functionArn,
-          Input: String(lambdaPayload),
+          Input: JSON.stringify(lambdaPayload),
           RoleArn: schedulerRole.roleArn,
         },
       },

@@ -56,6 +56,8 @@ export class InfraStack extends Stack {
       "sns-topic-arn": topic.topicArn,
     }
 
+    console.log("Full payload: '" + JSON.stringify(lambdaPayload) + "'")
+
     // To run at 1 minute past the hour, every three hours
     const ebScheduler = new CfnResource(this, 'mtlockyer-scheduler', {
       type: 'AWS::Scheduler::Schedule',

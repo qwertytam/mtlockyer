@@ -12,11 +12,9 @@ const props = {
         region: app.node.tryGetContext("region"),
     },
     emailNotification: app.node.tryGetContext("emailNotification"),
-    lambdaFnPayload: {
-        siteUn: app.node.tryGetContext("siteUN"),
-        s3Bucket: app.node.tryGetContext("s3Bucket"),
-        s3ObjectKey: app.node.tryGetContext("s3ObjKey")
-    }
+    siteUn: app.node.tryGetContext("siteUN"),
+    s3Bucket: app.node.tryGetContext("s3Bucket"),
+    s3ObjectKey: app.node.tryGetContext("s3ObjKey")
 };
 
 const fullName = `${props.applicationTag}-${props.name}-002`;

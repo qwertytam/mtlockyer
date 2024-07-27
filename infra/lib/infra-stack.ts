@@ -10,7 +10,9 @@ export interface InfraStackProps extends StackProps {
   fullName: string;
   pascalCaseFullName: string;
   emailNotification: string;
-  lambdaPayload: string;
+  siteUn: string;
+  s3Bucket: string;
+  s3ObjectKey: string;
 }
 
 export class InfraStack extends Stack {
@@ -44,10 +46,10 @@ export class InfraStack extends Stack {
      });
 
     var lambdaPayload:JSON = <JSON><unknown>{
-      "site-un": props.lambdaFnPayload.siteUn,
-      "s3-bucket": props.lambdaFnPayload.s3Bucket,
-      "s3-object-key": props.lambdaFnPayload.s3ObjectKey,
-      "sns-topic-arn": topic.topicArn
+      "site-un": props.siteUn,
+      "s3-bucket": props.s3Bucket,
+      "s3-object-key": props.s3ObjectKey,
+      "sns-topic-arn": topic.topicArn,
     }
 
     // To run at 1 minute past the hour, every three hours

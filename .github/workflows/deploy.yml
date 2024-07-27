@@ -11,6 +11,9 @@ env:
   APPLICATION_TAG: ${{ vars.APPLICATION_TAG }}
   APPLICATION_NAME: ${{ vars.APPLICATION_NAME }}
   EMAIL_NOTIFICATION: ${{ secrets.EMAIL_NOTIFICATION }}
+  SITE_UN: ${{ secrets.SITE_UN }}
+  S3_BUCKET: ${{ secrets.S3_BUCKET }}
+  S3_OBJECT: ${{ secrets.S3_OBJECT }}
 
 permissions:
   id-token: write # This is required for requesting the JWT

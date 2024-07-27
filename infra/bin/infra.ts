@@ -19,6 +19,11 @@ const props = {
 
 console.log("infra.ts siteUn: '" + props.siteUn + "'")
 console.log("infra.ts siteUn: '" + app.node.tryGetContext("siteUN") + "'")
+console.log("raw call")
+console.log(app.node.tryGetContext("siteUN"))
+console.log("raw call with String()")
+console.log(String(app.node.tryGetContext("siteUN")))
+console.log("end raw call")
 
 const fullName = `${props.applicationTag}-${props.name}-AA`;
 const pascalCaseFullName = fullName.split("-")

@@ -82,10 +82,23 @@ export class InfraStack extends Stack {
          resources: [lambdaFunction.functionArn],
          effect: iam.Effect.ALLOW,
        }),
+       new iam.PolicyStatement({
+        actions: ["sns:Publish"],
+        resources: [topic.topicArn],
+        effect: iam.Effect.ALLOW,
+      }),
+      new iam.PolicyStatement({
+        actions: ["secretsmanager:GetSecretValue"],
+        resources: ["arn:aws:secretsmanager:*"],
+        effect: iam.Effect.ALLOW,
+      }),
      ],
     }),
    });
-   schedulerRole.attachInlinePolicy(invokeLambdaPolicy);
+  schedulerRole.attachInlinePolicy(invokeLambdaPolicy);
+
+  schedulerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'));
+  schedulerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AWSLambdaBasicExecutionRole'));
 
   Tags.of(lambdaFunction).add("Customer", props.applicationTag);
 

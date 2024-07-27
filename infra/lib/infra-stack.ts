@@ -49,8 +49,7 @@ export class InfraStack extends Stack {
         Name: "myLockyerEBScheduler",
         Description: "Runs Mt Lockyer every three hours",
         FlexibleTimeWindow: { Mode: 'OFF' },
-        ScheduleExpression: "cron(1 */3 * * *)",
-        ScheduleExpressionTimezone: "America/New_York",
+        ScheduleExpression: "rate(5 minutes)",
         Target: {
           Arn: lambdaFunction.functionArn,
           RoleArn: schedulerRole.roleArn,

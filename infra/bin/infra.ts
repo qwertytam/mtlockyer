@@ -20,7 +20,7 @@ const props = {
 console.log("infra.ts siteUn: '" + props.siteUn + "'")
 console.log("infra.ts siteUn: '" + app.node.tryGetContext("siteUN") + "'")
 
-const fullName = `${props.applicationTag}-${props.name}-002`;
+const fullName = `${props.applicationTag}-${props.name}-AA`;
 const pascalCaseFullName = fullName.split("-")
     .map((word, index) =>
         index === 0 ? word.toLowerCase() : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())

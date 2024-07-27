@@ -19,7 +19,7 @@ export class InfraStack extends Stack {
   constructor(scope: Construct, id: string, props: InfraStackProps) {
     super(scope, id, props);
 
-    const lambdaFunction = new DockerImageFunction(this, `${props.pascalCaseFullName}SeleniumLambda`, {
+    const lambdaFunction = new DockerImageFunction(this, `${props.pascalCaseFullName}LambdaFn`, {
       code: DockerImageCode.fromImageAsset("../src"),
       timeout: Duration.seconds(90),
       functionName: `${props.fullName}-function`,
@@ -62,7 +62,7 @@ export class InfraStack extends Stack {
     const ebScheduler = new CfnResource(this, 'mtlockyer-scheduler', {
       type: 'AWS::Scheduler::Schedule',
       properties: {
-        Name: "myLockyerEBScheduler002",
+        Name: `${props.pascalCaseFullName}EBScheduler`,
         Description: "Runs Mt Lockyer every three hours",
         FlexibleTimeWindow: { Mode: 'OFF' },
         ScheduleExpression: "rate(5 minutes)",

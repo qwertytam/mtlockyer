@@ -1,4 +1,4 @@
-import { Duration, Stack, StackProps, Tags, CfnParameter } from 'aws-cdk-lib';
+import { Duration, Stack, StackProps, Tags, CfnResource, aws_iam as iam } from 'aws-cdk-lib';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { DockerImageCode, DockerImageFunction } from 'aws-cdk-lib/aws-lambda';
@@ -30,14 +30,48 @@ export class InfraStack extends Stack {
 
     const regexPat = /,|;/;
     var emailAddresses = props.emailNotification.split(regexPat);
-
     emailAddresses.forEach((emailAddr, index) => {
+        // Note using json format as Gmail in particular causes spam filtering issues
+        // if just sending regular non-json format emails
         topic.addSubscription(new EmailSubscription(emailAddr, {json: true}));
         index++;
         console.log("Have added " + String(index) + " email addresses " + String(emailAddr.slice(0,5)) + "****"  + String(emailAddr.slice(-5)))
     });
 
-    Tags.of(lambdaFunction).add("Customer", props.applicationTag);
+    const schedulerRole = new iam.Role(this, "mtlockyer-scheduler-role", {
+      assumedBy: new iam.ServicePrincipal("scheduler.amazonaws.com"),
+     });
+
+    // To run at 1 minute past the hour, every three hours
+    const ebScheduler = new CfnResource(this, 'mtlockyer-scheduler', {
+      type: 'AWS::Scheduler::Schedule',
+      properties: {
+        Name: "myLockyerEBScheduler",
+        Description: "Runs Mt Lockyer every three hours",
+        FlexibleTimeWindow: { Mode: 'OFF' },
+        ScheduleExpression: "cron(1 */3 * * *)",
+        ScheduleExpressionTimezone: "America/New_York",
+        Target: {
+          Arn: lambdaFunction.functionArn,
+          RoleArn: schedulerRole.roleArn,
+        },
+      },
+    });
+
+  const invokeLambdaPolicy = new iam.Policy(this, "invoke-mtlockyer-lambda", {
+    document: new iam.PolicyDocument({
+     statements: [
+       new iam.PolicyStatement({
+         actions: ["lambda:InvokeFunction"],
+         resources: [lambdaFunction.functionArn],
+         effect: iam.Effect.ALLOW,
+       }),
+     ],
+    }),
+   });
+   schedulerRole.attachInlinePolicy(invokeLambdaPolicy);
+
+  Tags.of(lambdaFunction).add("Customer", props.applicationTag);
 
   }
 }

@@ -17,6 +17,9 @@ const props = {
     s3ObjectKey: app.node.tryGetContext("s3ObjKey")
 };
 
+console.log("infra.ts siteUn: '" + props.siteUn + "'")
+console.log("infra.ts siteUn: '" + app.node.tryGetContext("siteUN") + "'")
+
 const fullName = `${props.applicationTag}-${props.name}-002`;
 const pascalCaseFullName = fullName.split("-")
     .map((word, index) =>

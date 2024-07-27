@@ -5,6 +5,7 @@ if [[ -d "infra" ]]; then
     cd infra
 
     echo "Install AWS CDK version ${CDK_VERSION}.."
+    echo "SITE_UN '${SITE_UN}'"
 
     npm i -g aws-cdk@${CDK_VERSION}
     npm ci --include=dev

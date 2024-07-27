@@ -14,16 +14,9 @@ const props = {
     emailNotification: app.node.tryGetContext("emailNotification"),
     siteUn: app.node.tryGetContext("siteUn"),
     s3Bucket: app.node.tryGetContext("s3Bucket"),
-    s3ObjectKey: app.node.tryGetContext("s3ObjectKey")
+    s3ObjectKey: app.node.tryGetContext("s3ObjectKey"),
+    secretsMgrArn: app.node.tryGetContext("secretsMgrArn")
 };
-
-console.log("infra.ts siteUn: '" + props.siteUn + "'")
-console.log("infra.ts siteUn: '" + app.node.tryGetContext("siteUn") + "'")
-console.log("raw call")
-console.log(app.node.tryGetContext("siteUn"))
-console.log("raw call with String()")
-console.log(String(app.node.tryGetContext("siteUn")))
-console.log("end raw call")
 
 const fullName = `${props.applicationTag}-${props.name}-AA`;
 const pascalCaseFullName = fullName.split("-")

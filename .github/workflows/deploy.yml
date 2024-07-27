@@ -14,6 +14,7 @@ env:
   SITE_UN: ${{ secrets.SITE_UN }}
   S3_BUCKET: ${{ secrets.S3_BUCKET }}
   S3_OBJECT: ${{ secrets.S3_OBJECT }}
+  SECRETS_MGR_ARN: ${{ secrets.SECRETS_MGR_ARN }}
 
 permissions:
   id-token: write # This is required for requesting the JWT

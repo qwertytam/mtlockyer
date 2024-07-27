@@ -19,6 +19,7 @@ if [[ -d "infra" ]]; then
         --context siteUn=${SITE_UN} \
         --context s3Bucket=${S3_BUCKET} \
         --context s3ObjectKey=${S3_OBJECT} \
+        --context secretsMgrArn=${SECRETS_MGR_ARN} \
         --all \
         --require-approval never
 fi

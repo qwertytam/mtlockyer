@@ -13,6 +13,7 @@ export interface InfraStackProps extends StackProps {
   siteUn: string;
   s3Bucket: string;
   s3ObjectKey: string;
+  secretsMgrArn: string;
 }
 
 export class InfraStack extends Stack {
@@ -89,16 +90,22 @@ export class InfraStack extends Stack {
       }),
       new iam.PolicyStatement({
         actions: ["secretsmanager:GetSecretValue"],
-        resources: ["arn:aws:secretsmanager:*"],
+        resources: [props.secretsMgrArn],
         effect: iam.Effect.ALLOW,
       }),
-     ],
+    ],
     }),
    });
   schedulerRole.attachInlinePolicy(invokeLambdaPolicy);
 
   schedulerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'));
   schedulerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'));
+
+  // schedulerRole.addManagedPolicy(iam.ManagedPolicy.fromManagedPolicyName(
+  //   this,
+  //   'external-boundary-id',
+  //   'get-mtlockyer-secrets',
+  // ));
 
   Tags.of(lambdaFunction).add("Customer", props.applicationTag);
 

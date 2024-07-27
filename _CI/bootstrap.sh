@@ -6,6 +6,7 @@ if [[ -d "infra" ]]; then
 
     echo "Install AWS CDK version ${CDK_VERSION}.."
     echo "SITE_UN '${SITE_UN}'"
+    echo "emailNotification '${EMAIL_NOTIFICATION}'"
 
     npm i -g aws-cdk@${CDK_VERSION}
     npm ci --include=dev

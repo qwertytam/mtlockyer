@@ -10,6 +10,7 @@ export interface InfraStackProps extends StackProps {
   fullName: string;
   pascalCaseFullName: string;
   emailNotification: string;
+  lambdaPayload: string;
 }
 
 export class InfraStack extends Stack {
@@ -42,6 +43,13 @@ export class InfraStack extends Stack {
       assumedBy: new iam.ServicePrincipal("scheduler.amazonaws.com"),
      });
 
+    var lambdaPayload:JSON = <JSON><unknown>{
+      "site-un": props.lambdaFnPayload.siteUn,
+      "s3-bucket": props.lambdaFnPayload.s3Bucket,
+      "s3-object-key": props.lambdaFnPayload.s3ObjectKey,
+      "sns-topic-arn": topic.topicArn
+    }
+
     // To run at 1 minute past the hour, every three hours
     const ebScheduler = new CfnResource(this, 'mtlockyer-scheduler', {
       type: 'AWS::Scheduler::Schedule',
@@ -52,6 +60,7 @@ export class InfraStack extends Stack {
         ScheduleExpression: "rate(5 minutes)",
         Target: {
           Arn: lambdaFunction.functionArn,
+          Input: lambdaPayload,
           RoleArn: schedulerRole.roleArn,
         },
       },

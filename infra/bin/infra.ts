@@ -11,7 +11,12 @@ const props = {
         account: app.node.tryGetContext("accountId"),
         region: app.node.tryGetContext("region"),
     },
-    emailNotification: app.node.tryGetContext("emailNotification")
+    emailNotification: app.node.tryGetContext("emailNotification"),
+    lambdaFnPayload: {
+        siteUn: app.node.tryGetContext("siteUN"),
+        s3Bucket: app.node.tryGetContext("s3Bucket"),
+        s3ObjectKey: app.node.tryGetContext("s3ObjKey")
+    }
 };
 
 const fullName = `${props.applicationTag}-${props.name}-002`;
@@ -26,7 +31,7 @@ const infraStack = new InfraStack(
     {
         ...props,
         fullName: fullName,
-        pascalCaseFullName: pascalCaseFullName
+        pascalCaseFullName: pascalCaseFullName,
     }
 );
 

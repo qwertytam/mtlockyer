@@ -26,6 +26,7 @@ def lambda_handler(event, context):
     Returns:
         Status response dictionary
     """
+    logger.info("Starting lambda with event: '%s'", event)
     site_un = event.get("site-un", "")
 
     aws_secrets = json.loads(get_aws_secret("mtlockeyer-aws-secrets"))
@@ -33,6 +34,9 @@ def lambda_handler(event, context):
     student_id = aws_secrets.get("student-id", "")
 
     driver = initialise_driver()
+
+    logger.info("site_un: '%s'", site_un)
+    logger.info("student_id: '%s'", student_id)
 
     _ = login(str(URLConstants.LOGIN_URL.value), site_un, site_pw, driver)
 
@@ -54,6 +58,7 @@ def lambda_handler(event, context):
 
     if has_changed:
         sns_topic_arn = event.get("sns-topic-arn", "")
+        logger.info("sns_topic_arn: '%s'", sns_topic_arn)
         subject_text = f"Now #{wl_posn} on the waitlist; previously #{wl_posn_old}"
         body_text = (
             "Sent at "

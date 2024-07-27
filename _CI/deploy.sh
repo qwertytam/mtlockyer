@@ -12,6 +12,9 @@ if [[ -d "infra" ]]; then
         --context region=${AWS_REGION} \
         --context applicationTag=${APPLICATION_TAG} \
         --context emailNotification=${EMAIL_NOTIFICATION} \
+        --context name=${SITE_UN} \
+        --context name=${S3_BUCKET} \
+        --context name=${S3_OBJECT} \
         --all \
         --require-approval never
 fi

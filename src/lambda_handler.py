@@ -38,6 +38,9 @@ def lambda_handler(event, context):
     logger.info("site_un: '%s'", site_un)
     logger.info("student_id: '%s'", student_id)
 
+    print("site_un: '%s'", site_un)
+    print("student_id: '%s'", student_id)
+
     _ = login(str(URLConstants.LOGIN_URL.value), site_un, site_pw, driver)
 
     driver = go_to_waitlist(student_id, driver)
@@ -59,6 +62,8 @@ def lambda_handler(event, context):
     if has_changed:
         sns_topic_arn = event.get("sns-topic-arn", "")
         logger.info("sns_topic_arn: '%s'", sns_topic_arn)
+        print("sns_topic_arn: '%s'", sns_topic_arn)
+
         subject_text = f"Now #{wl_posn} on the waitlist; previously #{wl_posn_old}"
         body_text = (
             "Sent at "

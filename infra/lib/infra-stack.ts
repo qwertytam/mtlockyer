@@ -45,6 +45,10 @@ export class InfraStack extends Stack {
       assumedBy: new iam.ServicePrincipal("scheduler.amazonaws.com"),
      });
 
+     console.log("site-un: '" + String(props.siteUn + "'"))
+     console.log("s3-bucket: '" + String(props.s3Bucket + "'"))
+     console.log("s3-object-key: '" + String(props.s3ObjectKey + "'"))
+
     var lambdaPayload:JSON = <JSON><unknown>{
       "site-un": props.siteUn,
       "s3-bucket": props.s3Bucket,

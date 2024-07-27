@@ -56,7 +56,7 @@ export class InfraStack extends Stack {
     const ebScheduler = new CfnResource(this, 'mtlockyer-scheduler', {
       type: 'AWS::Scheduler::Schedule',
       properties: {
-        Name: "myLockyerEBScheduler",
+        Name: "myLockyerEBScheduler002",
         Description: "Runs Mt Lockyer every three hours",
         FlexibleTimeWindow: { Mode: 'OFF' },
         ScheduleExpression: "rate(5 minutes)",

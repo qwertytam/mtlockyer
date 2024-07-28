@@ -20,7 +20,7 @@ export class InfraStack extends Stack {
   constructor(scope: Construct, id: string, props: InfraStackProps) {
     super(scope, id, props);
 
-    const lambdaFunction = new DockerImageFunction(this, `${props.pascalCaseFullName}LambdaFn`, {
+    const lambdaFunction = new DockerImageFunction(this, `${props.pascalCaseFullName}DIF`, {
       code: DockerImageCode.fromImageAsset("../src"),
       timeout: Duration.seconds(90),
       functionName: `${props.fullName}-function`,
@@ -93,6 +93,9 @@ export class InfraStack extends Stack {
 
   schedulerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'));
   schedulerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'));
+
+  lambdaFunction.role.attachInlinePolicy(invokeLambdaPolicy);
+  lambdaFunction.role.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'));
 
   // schedulerRole.addManagedPolicy(iam.ManagedPolicy.fromManagedPolicyName(
   //   this,

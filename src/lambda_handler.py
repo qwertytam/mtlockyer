@@ -35,12 +35,6 @@ def lambda_handler(event, context):
 
     driver = initialise_driver()
 
-    logger.info("site_un: '%s'", site_un)
-    logger.info("student_id: '%s'", student_id)
-
-    print("site_un: '%s'", site_un)
-    print("student_id: '%s'", student_id)
-
     _ = login(str(URLConstants.LOGIN_URL.value), site_un, site_pw, driver)
 
     driver = go_to_waitlist(student_id, driver)

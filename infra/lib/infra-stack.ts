@@ -94,7 +94,7 @@ export class InfraStack extends Stack {
   schedulerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'));
   schedulerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'));
 
-  lambdaFunction.addToRolePolicy(new iam.PolicyStatement().addResources(props.secretsMgrArn).addActions(["secretsmanager:GetSecretValue"]));
+  lambdaFunction.addToRolePolicy(new iam.PolicyStatement().addResources(props.secretsMgrArn).addActions("secretsmanager:GetSecretValue"));
 
   Tags.of(lambdaFunction).add("Customer", props.applicationTag);
 

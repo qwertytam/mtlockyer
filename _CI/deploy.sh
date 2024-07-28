@@ -6,10 +6,6 @@ if [[ -d "infra" ]]; then
 
     echo "Deploy infra.."
 
-    echo "SITE_UN '${SITE_UN}'"
-    echo "S3_BUCKET '${S3_BUCKET}'"
-    echo "S3_OBJECT '${S3_OBJECT}'"
-
     npm run cdk deploy -- \
         --context name=${APPLICATION_NAME} \
         --context accountId=${AWS_ACCOUNT_ID} \

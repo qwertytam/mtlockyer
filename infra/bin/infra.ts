@@ -17,7 +17,7 @@ const props = {
     s3ObjectKey: app.node.tryGetContext("s3ObjectKey"),
     secretsMgrArn: app.node.tryGetContext("secretsMgrArn")
 };
-console.log("Have sma: '" + String(props.secretsMgrArn) + "'");
+
 const fullName = `${props.applicationTag}-${props.name}-AA`;
 const pascalCaseFullName = fullName.split("-")
     .map((word, index) =>

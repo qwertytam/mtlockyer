@@ -39,16 +39,11 @@ export class InfraStack extends Stack {
         // if just sending regular non-json format emails
         topic.addSubscription(new EmailSubscription(emailAddr, {json: true}));
         index++;
-        console.log("Have added " + String(index) + " email addresses " + String(emailAddr.slice(0,5)) + "****"  + String(emailAddr.slice(-5)))
     });
 
     const schedulerRole = new iam.Role(this, "mtlockyer-scheduler-role", {
       assumedBy: new iam.ServicePrincipal("scheduler.amazonaws.com"),
      });
-
-     console.log("site-un: '" + String(props.siteUn) + "'")
-     console.log("s3-bucket: '" + String(props.s3Bucket) + "'")
-     console.log("s3-object-key: '" + String(props.s3ObjectKey) + "'")
 
     var lambdaPayload:JSON = <JSON><unknown>{
       "site-un": props.siteUn,
@@ -56,8 +51,6 @@ export class InfraStack extends Stack {
       "s3-object-key": props.s3ObjectKey,
       "sns-topic-arn": topic.topicArn,
     }
-
-    console.log("Full payload: '" + JSON.stringify(lambdaPayload) + "'")
 
     // To run at 1 minute past the hour, every three hours
     const ebScheduler = new CfnResource(this, 'mtlockyer-scheduler', {

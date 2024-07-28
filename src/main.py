@@ -177,18 +177,18 @@ def login(url: str, un: str, pw: str, driver, timeout: int = 5) -> bool:
 
     logger.info("Start login to '%s'", url)
     driver.get(url)
-
+    logger.info("un: '%s'  pw: '%s'", un, pw)
     wbd_wait = WebDriverWait(driver, timeout)
     wbd_wait.until(EC.element_to_be_clickable((By.ID, "id_username"))).send_keys(un)
-
+    logger.info("sent un")
     wbd_wait.until(EC.element_to_be_clickable((By.ID, "id_password"))).send_keys(pw)
-
+    logger.info("sent pw")
     wbd_wait.until(
         EC.element_to_be_clickable(
             (By.XPATH, ".//button[@class='button' and @type='submit']")
         )
     ).click()
-
+    logger.info("checking logged in status")
     logged_in = _check_logged_in(wbd_wait)
 
     return logged_in

@@ -18,7 +18,13 @@ const props = {
     secretsMgrArn: app.node.tryGetContext("secretsMgrArn")
 };
 
-const fullName = `${props.applicationTag}-${props.name}-AA`;
+const fullName = `${props.applicationTag}-${props.name}`;
+
+// Convert fullName to pascal case
+// Uses ternary operator (a shorthand for if-else).
+// If the current element is the first element in the array (i.e., index === 0),
+// it converts the word to lowercase. If the current element is not the first
+// element, it converts the first character of the word to uppercase
 const pascalCaseFullName = fullName.split("-")
     .map((word, index) =>
         index === 0 ? word.toLowerCase() : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())

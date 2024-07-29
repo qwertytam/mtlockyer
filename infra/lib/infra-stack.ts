@@ -68,34 +68,56 @@ export class InfraStack extends Stack {
       },
     });
 
+
+  const invokeLambdaPolicyStatement = new iam.PolicyStatement({
+    actions: ["lambda:InvokeFunction"],
+    resources: [lambdaFunction.functionArn],
+    effect: iam.Effect.ALLOW,
+  })
+
   const invokeLambdaPolicy = new iam.Policy(this, "invoke-mtlockyer-lambda", {
     document: new iam.PolicyDocument({
      statements: [
-       new iam.PolicyStatement({
-         actions: ["lambda:InvokeFunction"],
-         resources: [lambdaFunction.functionArn],
-         effect: iam.Effect.ALLOW,
-       }),
-       new iam.PolicyStatement({
-        actions: ["sns:Publish"],
-        resources: [topic.topicArn],
-        effect: iam.Effect.ALLOW,
-      }),
-      new iam.PolicyStatement({
-        actions: ["secretsmanager:GetSecretValue"],
-        resources: [props.secretsMgrArn],
-        effect: iam.Effect.ALLOW,
-      }),
+      invokeLambdaPolicyStatement
     ],
     }),
    });
-  schedulerRole.attachInlinePolicy(invokeLambdaPolicy);
 
-  schedulerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'));
-  schedulerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'));
+   schedulerRole.attachInlinePolicy(invokeLambdaPolicy);
 
-  lambdaFunction.role?.attachInlinePolicy(invokeLambdaPolicy);
-  lambdaFunction.role?.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'))
+  // schedulerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'));
+  // schedulerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'));
+
+  const snsPublishPolicyStatement = new iam.PolicyStatement({
+    actions: ["sns:Publish"],
+    resources: [topic.topicArn],
+    effect: iam.Effect.ALLOW,
+  })
+
+  const getSecretsPolicyStatement = new iam.PolicyStatement({
+    actions: ["secretsmanager:GetSecretValue"],
+    resources: [props.secretsMgrArn],
+    effect: iam.Effect.ALLOW,
+  })
+
+  const s3PolicyStatement = new iam.PolicyStatement({
+    actions: ["s3:PutObject", "s3:GetObject", "s3:ListBucket"],
+    resources: ["*"],
+    effect: iam.Effect.ALLOW,
+  })
+
+   const executeLambdaPolicy = new iam.Policy(this, "execute-mtlockyer-lambda", {
+    document: new iam.PolicyDocument({
+     statements: [
+      snsPublishPolicyStatement,
+      getSecretsPolicyStatement,
+      s3PolicyStatement
+    ],
+    }),
+   });
+
+  lambdaFunction.role?.attachInlinePolicy(executeLambdaPolicy);
+  // lambdaFunction.role?.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'))
 
   Tags.of(lambdaFunction).add("Customer", props.applicationTag);
 

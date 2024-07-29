@@ -37,44 +37,51 @@ def lambda_handler(event, context):
 
     logged_in = login(str(URLConstants.LOGIN_URL.value), site_un, site_pw, driver)
 
-    try:
+    if logged_in:
         driver = go_to_waitlist(student_id, driver)
-    except Exception as e:
-        logger.error("An unknown error occurred: '%s'", e, exc_info=True)
-    finally:
-        if logged_in:
-            print("Running finally with logged in status: '%s'", logged_in)
-        else:
-            print("Running finally with logged in status: '%s'", logged_in)
+        wl_posn = get_latest_waitlist_posn(driver.page_source)
+        logger.info("Latest waitlist position: '%s'", wl_posn)
 
-    wl_posn = get_latest_waitlist_posn(driver.page_source)
-    logger.info("Latest waitlist position: '%s'", wl_posn)
+        s3_bucket = event.get("s3-bucket", "")
+        s3_object_key = event.get("s3-object-key", "")
 
-    s3_bucket = event.get("s3-bucket", "")
-    s3_object_key = event.get("s3-object-key", "")
+        s3_bucket_object = {"bucket": s3_bucket, "object_key": s3_object_key}
+        has_changed, wl_posn_old = compare_waitlist_posns(
+            wl_posn, s3_bucket_object=s3_bucket_object
+        )
+        logger.info("Has waitlist position changed?: '%s'", has_changed)
 
-    s3_bucket_object = {"bucket": s3_bucket, "object_key": s3_object_key}
-    has_changed, wl_posn_old = compare_waitlist_posns(
-        wl_posn, s3_bucket_object=s3_bucket_object
-    )
-    logger.info("Has waitlist position changed?: '%s'", has_changed)
+        if has_changed:
+            sns_topic_arn = event.get("sns-topic-arn", "")
+            subject_text = f"Now #{wl_posn} on the waitlist; previously #{wl_posn_old}"
+            body_text = (
+                "Sent at "
+                + f"{dt.now().astimezone(tz.utc).strftime(str(DateFormats.DEFAULT.value))}"
+            )
 
-    driver.quit()
+            email_response = send_email(sns_topic_arn, subject_text, body_text)
 
-    if has_changed:
+        response = {
+            "statusCode": 200,
+            "headers": {"Content-Type": "application/json"},
+            "body": {"message": "completed"},
+        }
+    else:
         sns_topic_arn = event.get("sns-topic-arn", "")
-        subject_text = f"Now #{wl_posn} on the waitlist; previously #{wl_posn_old}"
+        subject_text = "Login failed"
         body_text = (
             "Sent at "
             + f"{dt.now().astimezone(tz.utc).strftime(str(DateFormats.DEFAULT.value))}"
         )
 
-        _ = send_email(sns_topic_arn, subject_text, body_text)
+        email_response = send_email(sns_topic_arn, subject_text, body_text)
 
-    response = {
-        "statusCode": 200,
-        "headers": {"Content-Type": "application/json"},
-        "body": {"message": "completed"},
-    }
+        response = {
+            "statusCode": 200,
+            "headers": {"Content-Type": "application/json"},
+            "body": {"message": "completed"},
+        }
+
+    driver.quit()
 
     return response

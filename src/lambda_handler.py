@@ -39,6 +39,8 @@ def lambda_handler(event, context):
 
     try:
         driver = go_to_waitlist(student_id, driver)
+    except Exception as e:
+        logger.error("An unknown error occurred: '%s'", e, exc_info=True)
     finally:
         if logged_in:
             print("Running finally with logged in status: '%s'", logged_in)
@@ -61,9 +63,6 @@ def lambda_handler(event, context):
 
     if has_changed:
         sns_topic_arn = event.get("sns-topic-arn", "")
-        logger.info("sns_topic_arn: '%s'", sns_topic_arn)
-        print("sns_topic_arn: '%s'", sns_topic_arn)
-
         subject_text = f"Now #{wl_posn} on the waitlist; previously #{wl_posn_old}"
         body_text = (
             "Sent at "

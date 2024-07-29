@@ -66,7 +66,6 @@ def initialise_driver(
     Returns:
         Selenium Chrome web driver
     """
-    logger.info("Initialising driver")
     chrome_options = ChromeOptions()
     if options is None:
         chrome_options.add_argument("--headless=new")
@@ -98,7 +97,6 @@ def initialise_driver(
     else:
         driver = webdriver.Chrome(options=chrome_options)
 
-    logger.info("Driver initialised; returning")
     return driver
 
 
@@ -160,7 +158,11 @@ def _check_logged_in(wbd_wait) -> bool:
         logger.info("top-graphic; assumed login successful in %s seconds", elapsed)
         logged_in = True
     except TimeoutException as e:
-        logger.info("TimeoutException: Assuming wrong credentials; exiting; %s", e)
+        logger.info(
+            "TimeoutException: Assuming wrong credentials; exiting; %s",
+            e,
+            exc_info=True,
+        )
     finally:
         if not logged_in:
             logger.info("Exception thrown; returning logged_in: '%s'", logged_in)
@@ -185,20 +187,19 @@ def login(url: str, un: str, pw: str, driver, timeout: int = 10) -> bool:
 
     logger.info("Start login to '%s'", url)
     driver.get(url)
-    logger.info("un: '%s'  pw: '%s'", un, pw)
+
     wbd_wait = WebDriverWait(driver, timeout)
     wbd_wait.until(EC.element_to_be_clickable((By.ID, "id_username"))).send_keys(un)
-    logger.info("sent un")
     wbd_wait.until(EC.element_to_be_clickable((By.ID, "id_password"))).send_keys(pw)
-    logger.info("sent pw")
+
     wbd_wait.until(
         EC.element_to_be_clickable(
             (By.XPATH, ".//button[@class='button' and @type='submit']")
         )
     ).click()
-    logger.info("checking logged in status")
+
     logged_in = _check_logged_in(wbd_wait)
-    logger.info("Returning logged in status: '%s'", logged_in)
+
     return logged_in
 
 

@@ -99,8 +99,5 @@ export class InfraStack extends Stack {
 
   Tags.of(lambdaFunction).add("Customer", props.applicationTag);
 
-  const checkBucketName = Boolean(props.s3Bucket == "nitorilambda")
-  console.log("checkBucketName: '" + checkBucketName + "'")
-
   }
 }

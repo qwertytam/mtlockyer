@@ -52,14 +52,13 @@ export class InfraStack extends Stack {
       "sns-topic-arn": topic.topicArn,
     }
 
-    // To run at 1 minute past the hour, every three hours
     const ebScheduler = new CfnResource(this, 'mtlockyer-scheduler', {
       type: 'AWS::Scheduler::Schedule',
       properties: {
         Name: `${props.pascalCaseFullName}EBScheduler`,
-        Description: "Runs Mt Lockyer every three hours",
+        Description: "Runs Mt Lockyer every six hours",
         FlexibleTimeWindow: { Mode: 'OFF' },
-        ScheduleExpression: "rate(6 hours)",
+        ScheduleExpression: "rate(3 minutes)",
         Target: {
           Arn: lambdaFunction.functionArn,
           Input: JSON.stringify(lambdaPayload),
@@ -86,7 +85,7 @@ export class InfraStack extends Stack {
    schedulerRole.attachInlinePolicy(invokeLambdaPolicy);
 
   // schedulerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'));
-  // schedulerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'));
+  schedulerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'));
 
   const snsPublishPolicyStatement = new iam.PolicyStatement({
     actions: ["sns:Publish"],

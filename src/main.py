@@ -5,6 +5,7 @@ import json
 from tempfile import mkdtemp
 from datetime import datetime as dt
 from datetime import timezone as tz
+import time
 from pathlib import Path
 from typing import Optional
 from bs4 import BeautifulSoup as bs
@@ -145,6 +146,7 @@ def _check_logged_in(wbd_wait) -> bool:
     """
     logged_in = False
     try:
+        tic = time.perf_counter()
         wbd_wait.until(
             EC.element_to_be_clickable(
                 (
@@ -153,12 +155,15 @@ def _check_logged_in(wbd_wait) -> bool:
                 )
             )
         )
-        logger.info("top-graphic; assumed login successful")
+        toc = time.perf_counter()
+        elapsed = f"{toc - tic:0.4f}"
+        logger.info("top-graphic; assumed login successful in %s seconds", elapsed)
         logged_in = True
     except TimeoutException as e:
         logger.info("TimeoutException: Assuming wrong credentials; exiting; %s", e)
     finally:
-        logged_in = False
+        if not logged_in:
+            logger.info("Exception thrown; returning logged_in: '%s'", logged_in)
 
     return logged_in
 

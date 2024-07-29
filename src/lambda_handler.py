@@ -35,9 +35,15 @@ def lambda_handler(event, context):
 
     driver = initialise_driver()
 
-    _ = login(str(URLConstants.LOGIN_URL.value), site_un, site_pw, driver)
+    logged_in = login(str(URLConstants.LOGIN_URL.value), site_un, site_pw, driver)
 
-    driver = go_to_waitlist(student_id, driver)
+    try:
+        driver = go_to_waitlist(student_id, driver)
+    finally:
+        if logged_in:
+            print("Running finally with logged in status: '%s'", logged_in)
+        else:
+            print("Running finally with logged in status: '%s'", logged_in)
 
     wl_posn = get_latest_waitlist_posn(driver.page_source)
     logger.info("Latest waitlist position: '%s'", wl_posn)

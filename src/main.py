@@ -149,18 +149,21 @@ def _check_logged_in(wbd_wait) -> bool:
             EC.element_to_be_clickable(
                 (
                     By.CLASS_NAME,
-                    "basic-card__title__school_name",
+                    "top-graphic",
                 )
             )
         )
-        logger.info("basic-card; assumed login successful")
+        logger.info("top-graphic; assumed login successful")
         logged_in = True
-    except TimeoutException:
-        logger.info("TimeoutException: Assuming wrong credentials; exiting")
+    except TimeoutException as e:
+        logger.info("TimeoutException: Assuming wrong credentials; exiting; %s", e)
+    finally:
+        logged_in = False
+
     return logged_in
 
 
-def login(url: str, un: str, pw: str, driver, timeout: int = 5) -> bool:
+def login(url: str, un: str, pw: str, driver, timeout: int = 10) -> bool:
     """
     Login in selenium browser
 
@@ -190,7 +193,7 @@ def login(url: str, un: str, pw: str, driver, timeout: int = 5) -> bool:
     ).click()
     logger.info("checking logged in status")
     logged_in = _check_logged_in(wbd_wait)
-
+    logger.info("Returning logged in status: '%s'", logged_in)
     return logged_in
 
 

@@ -59,7 +59,7 @@ export class InfraStack extends Stack {
         Name: `${props.pascalCaseFullName}EBScheduler`,
         Description: "Runs Mt Lockyer every three hours",
         FlexibleTimeWindow: { Mode: 'OFF' },
-        ScheduleExpression: "rate(5 minutes)",
+        ScheduleExpression: "rate(6 hours)",
         Target: {
           Arn: lambdaFunction.functionArn,
           Input: JSON.stringify(lambdaPayload),

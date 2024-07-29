@@ -58,7 +58,7 @@ export class InfraStack extends Stack {
         Name: `${props.pascalCaseFullName}EBScheduler`,
         Description: "Runs Mt Lockyer every six hours",
         FlexibleTimeWindow: { Mode: 'OFF' },
-        ScheduleExpression: "rate(3 minutes)",
+        ScheduleExpression: "rate(6 hours)",
         Target: {
           Arn: lambdaFunction.functionArn,
           Input: JSON.stringify(lambdaPayload),
@@ -66,7 +66,6 @@ export class InfraStack extends Stack {
         },
       },
     });
-
 
   const invokeLambdaPolicyStatement = new iam.PolicyStatement({
     actions: ["lambda:InvokeFunction"],
@@ -82,9 +81,7 @@ export class InfraStack extends Stack {
     }),
    });
 
-   schedulerRole.attachInlinePolicy(invokeLambdaPolicy);
-
-  // schedulerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'));
+  schedulerRole.attachInlinePolicy(invokeLambdaPolicy);
   schedulerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'));
 
   const snsPublishPolicyStatement = new iam.PolicyStatement({
@@ -116,7 +113,6 @@ export class InfraStack extends Stack {
    });
 
   lambdaFunction.role?.attachInlinePolicy(executeLambdaPolicy);
-  // lambdaFunction.role?.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'))
 
   Tags.of(lambdaFunction).add("Customer", props.applicationTag);
 
